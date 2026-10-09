@@ -8,10 +8,10 @@
  * - API routes, non-GET requests and other origins (Supabase) are never touched;
  *   offline writes are queued by the app itself (src/lib/outbox.ts).
  */
-const VERSION = "v2";
-const PAGES = `insurax-pages-${VERSION}`;
-const ASSETS = "insurax-assets"; // hashed file names: never needs versioning
-const STATIC = `insurax-static-${VERSION}`;
+const VERSION = "v3";
+const PAGES = `bimafy-pages-${VERSION}`;
+const ASSETS = "bimafy-assets"; // hashed file names: never needs versioning
+const STATIC = `bimafy-static-${VERSION}`;
 const OFFLINE_URL = "/offline";
 // Opened ahead of time so an agent can work offline right after installing.
 const WARM_PAGES = [OFFLINE_URL, "/app/agent", "/app/dashboard", "/app/quotes/new"];
@@ -32,7 +32,7 @@ self.addEventListener("activate", (event) => {
     (async () => {
       const keep = new Set([PAGES, ASSETS, STATIC]);
       const names = await caches.keys();
-      await Promise.all(names.filter((n) => n.startsWith("insurax-") && !keep.has(n)).map((n) => caches.delete(n)));
+      await Promise.all(names.filter((n) => (n.startsWith("bimafy-") || n.startsWith("insurax-")) && !keep.has(n)).map((n) => caches.delete(n)));
       if (self.registration.navigationPreload) await self.registration.navigationPreload.enable();
       await self.clients.claim();
     })(),

@@ -62,14 +62,14 @@ NEXT_PUBLIC_OPERATOR_ID=00000000-0000-4000-8000-000000000001
 
 Without env vars the console stays in **demo mode**. With env vars it switches to **Supabase Auth + Postgres** for products, quotes, policies, and claims.
 
-Create a first admin in Supabase Auth (`admin@insurax.africa`), then:
+Create a first admin in Supabase Auth (`admin@bimafy.app`), then:
 
 ```sql
 update profiles
 set role = 'admin',
     operator_id = '00000000-0000-4000-8000-000000000001',
     full_name = 'Platform Admin'
-where email = 'admin@insurax.africa';
+where email = 'admin@bimafy.app';
 ```
 
 Migrations live in `supabase/migrations/` (`00001`–`00011`). The live project records them under timestamp versions (e.g. `20261009085750_agency_desk`) because they were applied through the dashboard/MCP rather than the CLI, so **don't run `supabase db push`** against it — it would try to re-apply everything. Apply a new migration by pasting the file into the SQL editor (or via the Supabase MCP `apply_migration`), then keep the file here as the record.
@@ -82,7 +82,7 @@ Optionally set Auth `app_metadata`: `{ "role": "admin", "operator_id": "00000000
 
 ### Partner API
 
-Auth: `Authorization: Bearer insurax_pk_demo` (also `insurax_pk_sacco`, `insurax_pk_ride`).
+Auth: `Authorization: Bearer bimafy_pk_demo` (also `bimafy_pk_sacco`, `bimafy_pk_ride`).
 
 - `GET /api/v1/products`
 - `POST /api/v1/quotes` → `POST /api/v1/policies` (bind) → `POST /api/v1/claims`

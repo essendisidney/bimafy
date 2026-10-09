@@ -10,8 +10,8 @@ import { Button, Field, inputClass } from "@/components/ui";
 export default function LoginPage() {
   const { loginAs, loginWithPassword, mode } = useAuth();
   const router = useRouter();
-  const [email, setEmail] = useState("admin@insurax.africa");
-  const [password, setPassword] = useState("InsuraXDemo2026!");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -61,7 +61,6 @@ export default function LoginPage() {
             </Field>
             {error ? <p className="text-sm text-danger">{error}</p> : null}
             <Button type="submit">{busy ? "Signing in…" : "Sign in"}</Button>
-            <p className="text-xs text-mute">Seeded: admin@insurax.africa / InsuraXDemo2026!</p>
           </form>
         ) : null}
 

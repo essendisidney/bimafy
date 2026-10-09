@@ -4,7 +4,7 @@ import { useSyncExternalStore } from "react";
 
 export type Lang = "en" | "sw";
 
-const KEY = "insurax.lang";
+const KEY = "bimafy.lang";
 const listeners = new Set<() => void>();
 let current: Lang | null = null;
 

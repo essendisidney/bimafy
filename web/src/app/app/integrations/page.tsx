@@ -137,8 +137,8 @@ function CrbPanel() {
 }
 
 function ApiPlayground() {
-  const [apiKey, setApiKey] = useState("insurax_pk_demo");
-  const [log, setLog] = useState("Ready. Demo key: insurax_pk_demo");
+  const [apiKey, setApiKey] = useState("bimafy_pk_demo");
+  const [log, setLog] = useState("Ready. Demo key: bimafy_pk_demo");
   const [busy, setBusy] = useState(false);
   const [lastQuote, setLastQuote] = useState("");
   const [lastPolicy, setLastPolicy] = useState("");
@@ -235,8 +235,8 @@ function ApiPlayground() {
             </Button>
           </div>
           <p className="text-xs text-mute">
-            Keys: <code className="text-ink">insurax_pk_demo</code>, <code className="text-ink">insurax_pk_sacco</code>,{" "}
-            <code className="text-ink">insurax_pk_ride</code>. Add more via <code className="text-ink">PARTNER_API_KEYS</code>.
+            Keys: <code className="text-ink">bimafy_pk_demo</code>, <code className="text-ink">bimafy_pk_sacco</code>,{" "}
+            <code className="text-ink">bimafy_pk_ride</code>. Add more via <code className="text-ink">PARTNER_API_KEYS</code>.
           </p>
         </div>
         <pre className="max-h-80 overflow-auto rounded-xl border border-line bg-sand/50 p-3 text-xs text-ink whitespace-pre-wrap">
@@ -536,7 +536,7 @@ function WebhookInbox() {
         </div>
         <Button
           variant="secondary"
-          onClick={() => enqueueWebhook("connect.ping", { ok: true, source: "insurax-connect" })}
+          onClick={() => enqueueWebhook("connect.ping", { ok: true, source: "bimafy-connect" })}
         >
           Send test event
         </Button>

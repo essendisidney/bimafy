@@ -132,8 +132,8 @@ export const pendingLeadWrites = () => snapshot.pending;
 
 // ---------------------------------------------------------------- offline
 
-const outboxKey = () => `insurax.outbox.${remoteUser}`;
-const cacheKey = () => `insurax.leads.${remoteUser}`;
+const outboxKey = () => `bimafy.outbox.${remoteUser}`;
+const cacheKey = () => `bimafy.leads.${remoteUser}`;
 
 function storage(): Storage | null {
   try {

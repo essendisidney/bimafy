@@ -40,7 +40,7 @@ import type {
   WebhookDelivery,
 } from "./types";
 
-const KEY = "insurax.platform";
+const KEY = "bimafy.platform";
 
 function seedState(): PlatformState {
   return {

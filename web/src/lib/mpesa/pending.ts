@@ -18,12 +18,12 @@ export type PendingStk = {
 };
 
 const g = globalThis as typeof globalThis & {
-  __insuraxStkPending?: Map<string, PendingStk>;
+  __bimafyStkPending?: Map<string, PendingStk>;
 };
 
 function store() {
-  if (!g.__insuraxStkPending) g.__insuraxStkPending = new Map();
-  return g.__insuraxStkPending;
+  if (!g.__bimafyStkPending) g.__bimafyStkPending = new Map();
+  return g.__bimafyStkPending;
 }
 
 export function savePendingStk(result: StkInitiateResult, meta: Omit<PendingStk, keyof StkInitiateResult | "status" | "createdAt" | "checkoutRequestId" | "merchantRequestId" | "mode" | "phone" | "amount" | "accountReference"> & {
