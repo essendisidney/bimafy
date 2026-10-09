@@ -1,5 +1,7 @@
 # Bimafy
 
+_A product of Pesara Limited._
+
 **The End-to-End Insurance Operating Platform**
 
 Not just an insurance marketplace. Bimafy is the technology infrastructure that runs an insurer, broker, MGA, agent network, or embedded-insurance business end to end.

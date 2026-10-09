@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Bricolage_Grotesque, Outfit } from "next/font/google";
 import { ServiceWorkerRegister } from "@/components/pwa";
 import { AuthProvider } from "@/lib/auth";
+import { COMPANY } from "@/lib/brand";
 import { THEME_BOOT_SCRIPT } from "@/lib/theme-boot";
 import "./globals.css";
 
@@ -21,6 +22,9 @@ export const metadata: Metadata = {
   description:
     "Price cover in seconds, pay with M-Pesa, get your certificate on WhatsApp. Bimafy runs insurance end to end for customers, agents and insurers.",
   applicationName: "Bimafy",
+  authors: [{ name: COMPANY }],
+  creator: COMPANY,
+  publisher: COMPANY,
   appleWebApp: { capable: true, title: "Bimafy", statusBarStyle: "black-translucent" },
   icons: {
     icon: [{ url: "/icons/icon-192.png?v=b", sizes: "192x192", type: "image/png" }],

@@ -4,6 +4,7 @@ import { LandingHero, LandingSteps } from "@/components/landing-hero";
 import { Logo } from "@/components/logo";
 import { LangToggle } from "@/components/lang-toggle";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { COMPANY, PRODUCT_OF } from "@/lib/brand";
 import { modules } from "@/lib/modules";
 
 const MOAT = [
@@ -151,6 +152,9 @@ export default function Home() {
           <div>
             <Logo className="text-2xl" markClassName="h-8 w-8" />
             <p className="mt-2">Insurance, simplified. · Bima, kwa urahisi.</p>
+            <p className="mt-1 text-xs">
+              {PRODUCT_OF} · © {new Date().getFullYear()} {COMPANY}
+            </p>
           </div>
           <div className="flex gap-5">
             <a href="#how" className="hover:text-ink">How it works</a>
