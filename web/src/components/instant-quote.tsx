@@ -195,9 +195,9 @@ export function InstantQuote() {
 
       <div className="mt-5 rounded-2xl bg-forest p-5 text-champagne">
         <p className="text-xs uppercase tracking-[0.18em] text-gold">{product.name}</p>
-        <p className="mt-2 font-display text-5xl text-white" aria-live="polite">
-          {money(total)}
-          <span className="ml-1 font-sans text-base text-champagne/80">/ {PER[lang][frequency]}</span>
+        <p className="mt-2 flex flex-wrap items-baseline gap-x-1.5 font-display text-[2.6rem] leading-tight text-white sm:text-5xl" aria-live="polite">
+          <span className="whitespace-nowrap">{money(total)}</span>
+          <span className="whitespace-nowrap font-sans text-base font-normal tracking-normal text-champagne/80">/ {PER[lang][frequency]}</span>
         </p>
         {perDay ? <p className="mt-1 text-sm text-champagne/85">{t.perDay(money(perDay))}</p> : null}
 
