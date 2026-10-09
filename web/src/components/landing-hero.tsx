@@ -69,7 +69,7 @@ export function LandingHero() {
     <section className="mx-auto grid max-w-6xl gap-6 px-6 pb-14 pt-2 md:grid-cols-[1.05fr_0.95fr] md:gap-x-10 md:gap-y-8 md:pb-20 md:pt-4">
       <div className="animate-rise md:col-start-1 md:row-start-1 md:self-end">
         <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-teal">{t.eyebrow}</p>
-        <h1 className="mt-3 font-display text-4xl leading-[1.02] text-forest md:mt-4 md:text-6xl">{t.headline}</h1>
+        <h1 className="mt-3 font-display text-4xl leading-[1.02] text-heading md:mt-4 md:text-6xl">{t.headline}</h1>
       </div>
 
       <div className="animate-rise-delay md:col-start-2 md:row-span-2 md:row-start-1 md:self-center">
@@ -84,10 +84,10 @@ export function LandingHero() {
               key={d.userId}
               userId={d.userId}
               href={d.href}
-              className="group flex w-full items-center justify-between gap-4 rounded-2xl border border-line bg-white/70 px-4 py-3 text-left transition hover:border-teal hover:bg-white"
+              className="group flex w-full items-center justify-between gap-4 rounded-2xl border border-line bg-surface/70 px-4 py-3 text-left transition hover:border-teal hover:bg-surface"
             >
               <span>
-                <span className="block font-medium text-forest">{d.who}</span>
+                <span className="block font-medium text-heading">{d.who}</span>
                 <span className="block text-sm text-mute">{d.promise}</span>
               </span>
               <span className="shrink-0 text-sm font-medium text-teal transition group-hover:translate-x-0.5">

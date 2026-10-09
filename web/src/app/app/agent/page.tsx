@@ -44,7 +44,7 @@ import { createLead, distributorKey, logLeadActivity, newLeadId, ownsLead, useLe
 import { usePlatform } from "@/lib/store";
 import type { Lead, LeadActivity, LeadSource, LeadStatus, ProductLine } from "@/lib/types";
 import { LangToggle } from "@/components/lang-toggle";
-import { Badge, Button, Card, Empty, Field, PageHeader, Stat, Table, cn, inputClass } from "@/components/ui";
+import { Badge, Button, Card, Empty, Field, PageHeader, SkeletonRows, Stat, Table, cn, inputClass } from "@/components/ui";
 
 const LINES: ProductLine[] = ["motor", "medical", "micro", "family_takaful", "funeral", "travel", "gadget", "agriculture", "livestock", "asset"];
 const SOURCES: LeadSource[] = ["referral", "walk_in", "whatsapp", "partner", "ussd", "campaign", "renewal"];
@@ -61,8 +61,8 @@ function useCopy() {
 }
 
 const TEMP_STYLE: Record<LeadTemperature, string> = {
-  hot: "bg-rose-50 text-rose-700 border-rose-200",
-  warm: "bg-gold/15 text-[#8a6d12] border-gold/30",
+  hot: "bg-danger/10 text-danger border-danger/25",
+  warm: "bg-gold/15 text-gold-ink border-gold/30",
   cold: "bg-sand text-mute border-line",
 };
 
@@ -91,7 +91,7 @@ function ClientLangPicker({ value, onChange }: { value: Lang; onChange: (l: Lang
             key={l}
             onClick={() => onChange(l)}
             aria-pressed={value === l}
-            className={cn("rounded-md px-2 py-0.5 font-medium", value === l ? "bg-teal text-white" : "text-mute hover:text-ink")}
+            className={cn("rounded-md px-2 py-0.5 font-medium", value === l ? "bg-teal text-on-accent" : "text-mute hover:text-ink")}
           >
             {l.toUpperCase()}
           </button>
@@ -193,11 +193,11 @@ function AgentDesk() {
       </div>
 
       {leadsError ? (
-        <p role="alert" className="mt-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
+        <p role="alert" className="mt-4 rounded-xl border border-danger/25 bg-danger/10 px-4 py-3 text-sm text-danger">
           {leadsError}
         </p>
       ) : null}
-      {mode === "supabase" && leadsLoading && !leads.length ? <p className="mt-4 text-sm text-mute">{t.loading}</p> : null}
+      {mode === "supabase" && leadsLoading && !leads.length ? <Card className="mt-4"><SkeletonRows rows={3} label={t.loading} /></Card> : null}
 
       <div className="mt-6 flex gap-1 overflow-x-auto border-b border-line" role="tablist">
         {TABS.map((key) => (
@@ -212,8 +212,8 @@ function AgentDesk() {
             )}
           >
             {t.tabs[key]}
-            {key === "today" && dueCount ? <span className="ml-1.5 rounded-full bg-danger px-1.5 text-[10px] text-white">{dueCount}</span> : null}
-            {key === "renewals" && atRisk ? <span className="ml-1.5 rounded-full bg-gold px-1.5 text-[10px] text-ink">{atRisk}</span> : null}
+            {key === "today" && dueCount ? <span className="ml-1.5 rounded-full bg-danger px-1.5 text-[10px] text-on-accent">{dueCount}</span> : null}
+            {key === "renewals" && atRisk ? <span className="ml-1.5 rounded-full bg-gold px-1.5 text-[10px] text-forest">{atRisk}</span> : null}
           </button>
         ))}
       </div>
@@ -574,16 +574,16 @@ function LeadDrawer({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-ink/30" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex justify-end bg-black/30 animate-fade-in" onClick={onClose}>
       <aside
-        className="h-full w-full max-w-md overflow-y-auto bg-surface p-6 shadow-lift"
+        className="h-full w-full max-w-md overflow-y-auto bg-surface p-6 shadow-lift animate-slide-in-right"
         onClick={(e) => e.stopPropagation()}
         aria-label={lead.name}
       >
         <div className="flex items-start justify-between">
           <div>
             <p className="text-[11px] uppercase tracking-[0.18em] text-teal">{t.drawer.lead(t.line[lead.productLine])}</p>
-            <h2 className="font-display text-3xl text-forest">{lead.name}</h2>
+            <h2 className="font-display text-3xl text-heading">{lead.name}</h2>
             <p className="text-sm text-mute">
               {lead.phone}
               {lead.source ? ` · ${t.source[lead.source]}` : ""} · {compactMoney(leadValue(lead))}
@@ -639,7 +639,7 @@ function LeadDrawer({
                 aria-pressed={template === tpl}
                 className={cn(
                   "rounded-lg border px-2.5 py-1 text-xs",
-                  template === tpl ? "border-teal bg-teal text-white" : "border-line text-mute hover:text-ink",
+                  template === tpl ? "border-teal bg-teal text-on-accent" : "border-line text-mute hover:text-ink",
                 )}
               >
                 {WA_TEMPLATE_NAMES[lang][tpl]}
@@ -671,7 +671,7 @@ function LeadDrawer({
                   key={k}
                   onClick={() => setKind(k)}
                   aria-pressed={kind === k}
-                  className={cn("rounded-lg border px-2.5 py-1 text-xs", kind === k ? "border-teal bg-teal text-white" : "border-line text-mute")}
+                  className={cn("rounded-lg border px-2.5 py-1 text-xs", kind === k ? "border-teal bg-teal text-on-accent" : "border-line text-mute")}
                 >
                   {t.activity[k]}
                 </button>
@@ -747,8 +747,8 @@ function LeadDrawer({
 function RiskBadge({ level }: { level: RenewalItem["riskLabel"] }) {
   const { t } = useCopy();
   const tone = {
-    high: "bg-rose-50 text-rose-700 border-rose-200",
-    medium: "bg-gold/15 text-[#8a6d12] border-gold/30",
+    high: "bg-danger/10 text-danger border-danger/25",
+    medium: "bg-gold/15 text-gold-ink border-gold/30",
     low: "bg-teal/10 text-teal border-teal/20",
   }[level];
   return <span className={cn("whitespace-nowrap rounded-lg border px-2 py-0.5 text-xs", tone)}>{t.renewals.risk[level]}</span>;

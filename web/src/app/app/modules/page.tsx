@@ -15,7 +15,7 @@ export default function ModulesPage() {
           <Link key={mod.slug} href={mod.href} className="group">
             <Card className="h-full p-5 transition group-hover:-translate-y-0.5 group-hover:border-teal">
               <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-teal">{mod.code}</p>
-              <h2 className="mt-2 font-display text-2xl text-forest">{mod.name}</h2>
+              <h2 className="mt-2 font-display text-2xl text-heading">{mod.name}</h2>
               <p className="mt-2 text-sm text-mute">{mod.tagline}</p>
               <p className="mt-3 text-sm leading-relaxed text-ink/80">{mod.description}</p>
               <ul className="mt-4 space-y-1 text-xs text-mute">

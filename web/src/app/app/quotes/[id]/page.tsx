@@ -1,11 +1,12 @@
 "use client";
 
+import { SearchX } from "lucide-react";
 import type { ReactNode } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { persistPolicy, updateQuoteRemote, useQuotesBook } from "@/lib/data";
 import { money } from "@/lib/format";
-import { Badge, Button, Card, PageHeader } from "@/components/ui";
+import { Badge, Button, Card, DetailSkeleton, Empty, PageHeader } from "@/components/ui";
 
 function canConvertQuote(quote: { status: string; uwDecision: string }) {
   if (quote.status === "converted" || quote.status === "declined" || quote.status === "expired") {
@@ -23,8 +24,17 @@ export default function QuoteDetailPage() {
   const { quotes, loading } = useQuotesBook();
   const quote = quotes.find((q) => q.id === id);
 
-  if (loading) return <p className="text-sm text-mute">Loading quote…</p>;
-  if (!quote) return <p>Quote not found.</p>;
+  if (loading) return <DetailSkeleton label="Loading quote" />;
+  if (!quote) return (
+      <Card>
+        <Empty
+          icon={SearchX}
+          title="Quote not found"
+          hint="It may have expired, or the link is mistyped."
+          action={<Button href="/app/quotes" variant="secondary">All quotations</Button>}
+        />
+      </Card>
+    );
 
   const convertible = canConvertQuote(quote);
   const awaitingUw = quote.status === "referred" || quote.uwDecision === "refer";

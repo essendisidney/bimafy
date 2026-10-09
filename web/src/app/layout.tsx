@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond, Outfit } from "next/font/google";
 import { AuthProvider } from "@/lib/auth";
+import { THEME_BOOT_SCRIPT } from "@/lib/theme-boot";
 import "./globals.css";
 
 const outfit = Outfit({
@@ -22,7 +23,11 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${outfit.variable} ${cormorant.variable} h-full antialiased`}>
+    // suppressHydrationWarning: the boot script may set data-theme before React hydrates.
+    <html lang="en" className={`${outfit.variable} ${cormorant.variable} h-full antialiased`} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_BOOT_SCRIPT }} />
+      </head>
       <body className="min-h-full bg-paper font-sans text-ink">
         <AuthProvider>{children}</AuthProvider>
       </body>

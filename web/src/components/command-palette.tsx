@@ -171,12 +171,12 @@ export function CommandPalette({ user, onClose }: { user: SessionUser; onClose: 
   let lastGroup: Entry["group"] | null = null;
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-start justify-center bg-ink/40 px-4 pt-[12vh] backdrop-blur-sm" onClick={onClose}>
+    <div className="fixed inset-0 z-[60] flex items-start justify-center bg-black/40 px-4 pt-[12vh] backdrop-blur-sm animate-fade-in" onClick={onClose}>
       <div
         role="dialog"
         aria-modal="true"
         aria-label="Search InsuraX"
-        className="w-full max-w-xl overflow-hidden rounded-2xl border border-line bg-surface shadow-lift"
+        className="w-full max-w-xl overflow-hidden rounded-2xl border border-line bg-surface shadow-lift animate-pop-in"
         onClick={(e) => e.stopPropagation()}
         onKeyDown={onKeyDown}
       >
@@ -224,7 +224,7 @@ export function CommandPalette({ user, onClose }: { user: SessionUser; onClose: 
                   <span
                     className={cn(
                       "grid h-8 w-8 shrink-0 place-items-center rounded-lg border",
-                      i === current ? "border-teal/30 bg-white text-teal" : "border-line text-mute",
+                      i === current ? "border-teal/30 bg-surface text-teal" : "border-line text-mute",
                     )}
                   >
                     <Icon className="h-4 w-4" aria-hidden />

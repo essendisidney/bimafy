@@ -66,7 +66,7 @@ export default function FraudPage() {
                 <td className="px-3 py-3">{c.participantName}</td>
                 <td className="px-3 py-3">{money(c.claimed)}</td>
                 <td className="px-3 py-3">
-                  <span className={c.fraudScore >= 60 ? "font-semibold text-danger" : "text-forest"}>
+                  <span className={c.fraudScore >= 60 ? "font-semibold text-danger" : "text-heading"}>
                     {c.fraudScore}
                   </span>
                 </td>

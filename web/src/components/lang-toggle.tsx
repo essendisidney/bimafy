@@ -10,7 +10,7 @@ export function LangToggle() {
     { value: "sw", label: "SW" },
   ];
   return (
-    <div className="flex rounded-xl border border-line bg-white/70 p-0.5 text-xs" role="group" aria-label="Language / Lugha">
+    <div className="flex rounded-xl border border-line bg-surface/70 p-0.5 text-xs" role="group" aria-label="Language / Lugha">
       {options.map((o) => (
         <button
           key={o.value}

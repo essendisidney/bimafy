@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useAuth } from "@/lib/auth";
 import { useClaimsBook } from "@/lib/data";
 import { money } from "@/lib/format";
-import { Badge, Button, Card, PageHeader, Table } from "@/components/ui";
+import { Badge, Button, Card, PageHeader, SkeletonRows, Table } from "@/components/ui";
 
 export default function ClaimsPage() {
   const { user } = useAuth();
@@ -32,7 +32,7 @@ export default function ClaimsPage() {
         }
       />
       <Card className="p-2">
-        {loading ? <p className="p-4 text-sm text-mute">Loading claims…</p> : null}
+        {loading ? <SkeletonRows label="Loading claims" /> : null}
         <Table headers={["Claim", "Policy", "Participant", "Amount", "Fraud", "Status", "SLA", ""]}>
           {rows.map((c) => (
             <tr key={c.id} className="border-b border-line/70">

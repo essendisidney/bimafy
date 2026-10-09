@@ -1,30 +1,104 @@
 @import "tailwindcss";
 
-:root {
-  --background: #f2f5f8;
-  --foreground: #0a1628;
+/* `.theme-light` keeps a subtree on the light palette in any theme (e.g. device mock-ups). */
+:root,
+.theme-light {
+  color-scheme: light;
+  --paper: #f2f5f8;
+  --sand: #e7eef4;
+  --surface: #ffffff;
+  --ink: #0a1628;
+  --heading: #0b1f3a;
+  --mute: #5b6b7c;
+  --line: #d3dde8;
+  --forest: #0b1f3a;
+  --navy: #122848;
+  --teal: #0e7c66;
+  --mint: #1fa88a;
+  --on-accent: #ffffff;
+  --gold: #c9a227;
+  --gold-ink: #8a6d12;
+  --champagne: #e8d5a3;
+  --danger: #b42318;
+  --shadow-soft: 0 18px 40px rgba(10, 22, 40, 0.08);
+  --shadow-lift: 0 24px 60px rgba(10, 22, 40, 0.12);
+  --atmosphere-base: linear-gradient(180deg, #eef3f7 0%, #f2f5f8 42%, #e9eef3 100%);
+}
+
+/*
+ * Dark theme: follows the device unless the visitor picked one
+ * (html[data-theme] is set before paint by the script in app/layout.tsx).
+ * Every pair here was checked for WCAG AA contrast.
+ */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --paper: #0a1220;
+    --sand: #18263b;
+    --surface: #111c2e;
+    --ink: #e7eef6;
+    --heading: #f1f5fa;
+    --mute: #9aabbf;
+    --line: #26364f;
+    --forest: #0d2440;
+    --navy: #16304f;
+    --teal: #34c3a0;
+    --mint: #5fd6b8;
+    --on-accent: #04131f;
+    --gold: #d9b44a;
+    --gold-ink: #e6c96b;
+    --danger: #ff8a7a;
+    --shadow-soft: 0 18px 40px rgba(0, 0, 0, 0.35);
+    --shadow-lift: 0 24px 60px rgba(0, 0, 0, 0.5);
+    --atmosphere-base: linear-gradient(180deg, #0b1424 0%, #0a1220 42%, #0c1626 100%);
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --paper: #0a1220;
+  --sand: #18263b;
+  --surface: #111c2e;
+  --ink: #e7eef6;
+  --heading: #f1f5fa;
+  --mute: #9aabbf;
+  --line: #26364f;
+  --forest: #0d2440;
+  --navy: #16304f;
+  --teal: #34c3a0;
+  --mint: #5fd6b8;
+  --on-accent: #04131f;
+  --gold: #d9b44a;
+  --gold-ink: #e6c96b;
+  --danger: #ff8a7a;
+  --shadow-soft: 0 18px 40px rgba(0, 0, 0, 0.35);
+  --shadow-lift: 0 24px 60px rgba(0, 0, 0, 0.5);
+  --atmosphere-base: linear-gradient(180deg, #0b1424 0%, #0a1220 42%, #0c1626 100%);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-paper: #f2f5f8;
-  --color-sand: #e7eef4;
-  --color-ink: #0a1628;
-  --color-mute: #5b6b7c;
-  --color-forest: #0b1f3a;
-  --color-navy: #122848;
-  --color-teal: #0e7c66;
-  --color-mint: #1fa88a;
-  --color-gold: #c9a227;
-  --color-champagne: #e8d5a3;
-  --color-line: #d3dde8;
-  --color-danger: #b42318;
-  --color-surface: #ffffff;
+  --color-background: var(--paper);
+  --color-foreground: var(--ink);
+  --color-paper: var(--paper);
+  --color-sand: var(--sand);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-heading: var(--heading);
+  --color-mute: var(--mute);
+  --color-line: var(--line);
+  --color-forest: var(--forest);
+  --color-navy: var(--navy);
+  --color-teal: var(--teal);
+  --color-mint: var(--mint);
+  --color-on-accent: var(--on-accent);
+  --color-gold: var(--gold);
+  --color-gold-ink: var(--gold-ink);
+  --color-champagne: var(--champagne);
+  --color-danger: var(--danger);
   --font-sans: var(--font-outfit);
   --font-display: var(--font-cormorant);
-  --shadow-soft: 0 18px 40px rgba(10, 22, 40, 0.08);
-  --shadow-lift: 0 24px 60px rgba(10, 22, 40, 0.12);
+  --shadow-soft: var(--shadow-soft);
+  --shadow-lift: var(--shadow-lift);
 }
 
 * {
@@ -39,6 +113,13 @@ body {
 
 body {
   font-family: var(--font-sans), sans-serif;
+}
+
+/* One visible, consistent keyboard focus ring everywhere (mouse clicks don't show it). */
+:focus-visible {
+  outline: 2px solid var(--teal);
+  outline-offset: 2px;
+  border-radius: 10px;
 }
 
 .font-display {
@@ -58,7 +139,7 @@ body {
     radial-gradient(1200px 600px at 12% -10%, rgba(14, 124, 102, 0.18), transparent 55%),
     radial-gradient(900px 500px at 90% 0%, rgba(201, 162, 39, 0.16), transparent 50%),
     radial-gradient(800px 500px at 70% 100%, rgba(18, 40, 72, 0.08), transparent 45%),
-    linear-gradient(180deg, #eef3f7 0%, #f2f5f8 42%, #e9eef3 100%);
+    var(--atmosphere-base);
 }
 
 .atmosphere-deep {
@@ -69,8 +150,8 @@ body {
 }
 
 .panel-glass {
-  background: rgba(255, 255, 255, 0.72);
-  border: 1px solid rgba(211, 221, 232, 0.9);
+  background: color-mix(in srgb, var(--surface) 72%, transparent);
+  border: 1px solid color-mix(in srgb, var(--line) 90%, transparent);
   backdrop-filter: blur(14px);
 }
 
@@ -97,10 +178,78 @@ body {
   }
 }
 
+/* Motion: short, purposeful, and off for people who ask for less. */
+.animate-fade-in {
+  animation: fade-in 160ms ease-out both;
+}
+
+.animate-pop-in {
+  animation: pop-in 180ms cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 240ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.animate-slide-in-left {
+  animation: slide-in-left 240ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.98);
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes slide-in-left {
+  from {
+    transform: translateX(-100%);
+  }
+}
+
+/* Loading placeholders. */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--sand) 0%,
+    color-mix(in srgb, var(--sand) 55%, var(--surface)) 50%,
+    var(--sand) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-rise,
   .animate-rise-delay,
-  .animate-rise-late {
+  .animate-rise-late,
+  .animate-fade-in,
+  .animate-pop-in,
+  .animate-slide-in-right,
+  .animate-slide-in-left,
+  .skeleton {
     animation: none;
   }
 }

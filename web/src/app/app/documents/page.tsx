@@ -239,7 +239,7 @@ function DocumentsDesk() {
                 type="button"
                 onClick={() => setFilter(t)}
                 className={`rounded-lg px-2.5 py-1 text-xs capitalize ${
-                  filter === t ? "bg-teal text-white" : "border border-line text-mute hover:border-teal"
+                  filter === t ? "bg-teal text-on-accent" : "border border-line text-mute hover:border-teal"
                 }`}
               >
                 {t}

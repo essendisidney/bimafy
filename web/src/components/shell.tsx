@@ -9,6 +9,7 @@ import { roleLabel } from "@/lib/format";
 import { primaryNav, visibleNav, type NavItem } from "@/lib/nav";
 import { setFlag, useFlag } from "@/lib/prefs";
 import { CommandPalette } from "./command-palette";
+import { ThemeToggle } from "./theme-toggle";
 import { NAV_ICONS } from "./nav-icons";
 import { cn } from "./ui";
 
@@ -143,8 +144,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         {/* Phone drawer: the full menu ("More"). */}
         {drawerOpen ? (
           <div className="fixed inset-0 z-40 md:hidden" role="dialog" aria-modal="true" aria-label="Menu">
-            <div className="absolute inset-0 bg-ink/50" onClick={() => setDrawerOpen(false)} />
-            <aside className="absolute inset-y-0 left-0 flex w-[85%] max-w-xs flex-col atmosphere-deep text-champagne shadow-lift">
+            <div className="absolute inset-0 bg-black/50 animate-fade-in" onClick={() => setDrawerOpen(false)} />
+            <aside className="absolute inset-y-0 left-0 flex w-[85%] max-w-xs flex-col atmosphere-deep text-champagne shadow-lift animate-slide-in-left">
               <div className="flex items-center justify-between px-5 py-5">
                 <span className="brand-mark text-3xl tracking-[0.08em] text-gold">InsuraX</span>
                 <button
@@ -156,6 +157,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 </button>
               </div>
               <div className="min-h-0 flex-1 overflow-y-auto">{navList(false, () => setDrawerOpen(false))}</div>
+              <div className="flex items-center justify-between border-t border-white/10 px-5 py-4 text-xs text-champagne/60">
+                <span>Appearance</span>
+                <ThemeToggle />
+              </div>
             </aside>
           </div>
         ) : null}
@@ -169,7 +174,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             >
               <Menu className="h-[18px] w-[18px]" aria-hidden />
             </button>
-            <span className="brand-mark text-xl text-forest md:hidden">InsuraX</span>
+            <span className="brand-mark text-xl text-heading md:hidden">InsuraX</span>
 
             <button
               onClick={() => setPaletteOpen(true)}
@@ -183,8 +188,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </button>
 
             <div className="flex items-center gap-3 md:ml-auto">
+              <ThemeToggle className="hidden sm:flex" />
               <div className="hidden text-right sm:block">
-                <p className="text-sm font-medium text-forest">{user.name}</p>
+                <p className="text-sm font-medium text-heading">{user.name}</p>
                 <p className="text-xs text-mute">
                   {roleLabel(user.role)} · {user.branch}
                 </p>

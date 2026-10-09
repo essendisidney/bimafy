@@ -1,12 +1,13 @@
 "use client";
 
+import { SearchX } from "lucide-react";
 import { useParams } from "next/navigation";
 import { downloadTextFile } from "@/lib/documents/certificate";
 import { updatePolicyRemote, usePaymentsBook, usePoliciesBook } from "@/lib/data";
 import { applyPolicyLifecycle, issuePolicyCertificate, type PolicyLifecycleAction } from "@/lib/events/ledger";
 import { money } from "@/lib/format";
 import type { PolicyStatus } from "@/lib/types";
-import { Badge, Button, Card, PageHeader } from "@/components/ui";
+import { Badge, Button, Card, DetailSkeleton, Empty, PageHeader } from "@/components/ui";
 
 const transitions: { label: string; action: PolicyLifecycleAction; status: PolicyStatus }[] = [
   { label: "Activate", action: "activate", status: "active" },
@@ -23,8 +24,17 @@ export default function PolicyDetailPage() {
   const { payments } = usePaymentsBook();
   const policy = policies.find((p) => p.id === id);
 
-  if (loading) return <p className="text-sm text-mute">Loading policy…</p>;
-  if (!policy) return <p>Policy not found.</p>;
+  if (loading) return <DetailSkeleton label="Loading policy" />;
+  if (!policy) return (
+      <Card>
+        <Empty
+          icon={SearchX}
+          title="Policy not found"
+          hint="Check the policy number, or search for it with ⌘K."
+          action={<Button href="/app/policies" variant="secondary">All policies</Button>}
+        />
+      </Card>
+    );
   const relatedPays = payments.filter((p) => p.policyNumber === policy.number);
   const history = policy.history ?? [];
 

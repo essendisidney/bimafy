@@ -9,7 +9,7 @@ import { persistQuote, useParticipants, useProducts } from "@/lib/data";
 import { money } from "@/lib/format";
 import { updateLead, useLeads } from "@/lib/leads";
 import type { Frequency } from "@/lib/types";
-import { Badge, Button, Card, Field, PageHeader, inputClass } from "@/components/ui";
+import { Badge, Button, Card, DetailSkeleton, Field, PageHeader, inputClass } from "@/components/ui";
 
 function digits(phone: string) {
   return phone.replace(/\D/g, "");
@@ -133,7 +133,7 @@ function NewQuoteForm() {
   }
 
   if (!product || !participant || !priced) {
-    return <p className="text-sm text-mute">Loading quote desk…</p>;
+    return <DetailSkeleton label="Loading quote desk" />;
   }
 
   return (
@@ -316,7 +316,7 @@ function Line({ k, v }: { k: string; v: string }) {
 
 export default function NewQuotePage() {
   return (
-    <Suspense fallback={<p>Loading quote desk…</p>}>
+    <Suspense fallback={<DetailSkeleton label="Loading quote desk" />}>
       <NewQuoteForm />
     </Suspense>
   );

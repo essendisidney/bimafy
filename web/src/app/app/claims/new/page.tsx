@@ -7,7 +7,7 @@ import { pushNotification, postJournal } from "@/lib/events/ledger";
 import { useAuth } from "@/lib/auth";
 import { persistClaim, useClaimsBook, usePoliciesBook } from "@/lib/data";
 import { platformStore } from "@/lib/store";
-import { Button, Card, Field, PageHeader, inputClass } from "@/components/ui";
+import { Button, Card, DetailSkeleton, Field, PageHeader, inputClass } from "@/components/ui";
 
 function NewClaimForm() {
   const router = useRouter();
@@ -184,7 +184,7 @@ function NewClaimForm() {
 
 export default function NewClaimPage() {
   return (
-    <Suspense fallback={<p className="text-sm text-mute">Loading FNOL…</p>}>
+    <Suspense fallback={<DetailSkeleton label="Loading claim form" />}>
       <NewClaimForm />
     </Suspense>
   );

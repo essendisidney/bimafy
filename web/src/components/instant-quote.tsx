@@ -165,7 +165,7 @@ export function InstantQuote() {
             onClick={() => setNeedSlug(n.slug)}
             className={cn(
               "rounded-xl border px-2 py-2.5 text-sm transition",
-              n.slug === need.slug ? "border-teal bg-teal text-white" : "border-line bg-white text-ink hover:border-teal",
+              n.slug === need.slug ? "border-teal bg-teal text-on-accent" : "border-line bg-surface text-ink hover:border-teal",
             )}
           >
             {n.label[lang]}
@@ -228,13 +228,13 @@ export function InstantQuote() {
       <button
         ref={ctaRef}
         onClick={buy}
-        className="mt-4 w-full rounded-xl bg-teal px-5 py-3 text-sm font-medium text-white transition hover:bg-mint"
+        className="mt-4 w-full rounded-xl bg-teal px-5 py-3 text-sm font-medium text-on-accent transition hover:bg-mint"
       >
         {t.cta}
       </button>
       <button
         onClick={share}
-        className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl border border-line bg-white px-5 py-2.5 text-sm text-ink transition hover:border-teal hover:text-teal"
+        className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl border border-line bg-surface px-5 py-2.5 text-sm text-ink transition hover:border-teal hover:text-teal"
       >
         {t.share}
       </button>
@@ -251,7 +251,7 @@ export function InstantQuote() {
             <div className="mx-auto flex max-w-md items-center justify-between gap-3">
               <div className="min-w-0">
                 <p className="truncate text-xs text-mute">{product.name}</p>
-                <p className="font-display text-2xl leading-none text-forest">
+                <p className="font-display text-2xl leading-none text-heading">
                   {money(total)}
                   <span className="ml-1 font-sans text-xs text-mute">/ {PER[lang][frequency]}</span>
                 </p>
@@ -259,7 +259,7 @@ export function InstantQuote() {
               <button
                 onClick={buy}
                 tabIndex={ctaVisible ? -1 : 0}
-                className="shrink-0 rounded-xl bg-teal px-4 py-3 text-sm font-medium text-white transition hover:bg-mint"
+                className="shrink-0 rounded-xl bg-teal px-4 py-3 text-sm font-medium text-on-accent transition hover:bg-mint"
               >
                 {lang === "sw" ? "Pata bima" : "Get covered"}
               </button>

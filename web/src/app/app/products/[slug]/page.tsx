@@ -1,9 +1,10 @@
 "use client";
 
+import { SearchX } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useProducts } from "@/lib/data";
 import { money } from "@/lib/format";
-import { Button, Card, PageHeader } from "@/components/ui";
+import { Button, Card, Empty, PageHeader } from "@/components/ui";
 
 export default function ProductDetailPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -11,7 +12,16 @@ export default function ProductDetailPage() {
   const product = products.find((p) => p.slug === slug);
 
   if (loading) return <p className="text-sm text-mute">Loading product…</p>;
-  if (!product) return <p>Product not found.</p>;
+  if (!product) return (
+      <Card>
+        <Empty
+          icon={SearchX}
+          title="Product not found"
+          hint="This product may have been retired."
+          action={<Button href="/app/products" variant="secondary">All products</Button>}
+        />
+      </Card>
+    );
 
   return (
     <div>
