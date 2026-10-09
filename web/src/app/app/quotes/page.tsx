@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useAuth } from "@/lib/auth";
 import { useQuotesBook } from "@/lib/data";
 import { money } from "@/lib/format";
-import { Badge, Button, Card, PageHeader, Table } from "@/components/ui";
+import { Badge, Button, Card, PageHeader, SkeletonRows, Table } from "@/components/ui";
 
 export default function QuotesPage() {
   const { user } = useAuth();
@@ -26,7 +26,7 @@ export default function QuotesPage() {
         actions={<Button href="/app/quotes/new">New quote</Button>}
       />
       <Card className="p-2">
-        {loading ? <p className="p-4 text-sm text-mute">Loading quotes…</p> : null}
+        {loading ? <SkeletonRows label="Loading quotes" /> : null}
         <Table headers={["Quote", "Participant", "Product", "Total", "UW", "Status", ""]}>
           {rows.map((q) => (
             <tr key={q.id} className="border-b border-line/70">

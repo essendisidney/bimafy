@@ -18,11 +18,11 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen atmosphere px-4 py-12">
       <div className="mx-auto max-w-4xl">
-        <p className="brand-mark text-4xl tracking-[0.08em] text-forest">InsuraX</p>
+        <p className="brand-mark text-4xl tracking-[0.08em] text-heading">InsuraX</p>
         <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-teal">
           Insurance OS · {mode}
         </p>
-        <h1 className="mt-4 font-display text-4xl text-forest md:text-5xl">
+        <h1 className="mt-4 font-display text-4xl text-heading md:text-5xl">
           {mode === "supabase" ? "Sign in to InsuraX" : "Enter as a persona"}
         </h1>
         <p className="mt-3 max-w-2xl text-mute">
@@ -66,7 +66,7 @@ export default function LoginPage() {
         ) : null}
 
         <div className="mt-10">
-          <p className="mb-4 text-sm font-medium text-forest">
+          <p className="mb-4 text-sm font-medium text-heading">
             {mode === "supabase" ? "Or continue with a local persona" : "Choose a persona"}
           </p>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -77,10 +77,10 @@ export default function LoginPage() {
                   loginAs(user.id);
                   router.push("/app/dashboard");
                 }}
-                className="rounded-2xl border border-line bg-white/80 p-4 text-left shadow-soft transition hover:-translate-y-0.5 hover:border-teal hover:shadow-lift"
+                className="rounded-2xl border border-line bg-surface/80 p-4 text-left shadow-soft transition hover:-translate-y-0.5 hover:border-teal hover:shadow-lift"
               >
                 <p className="text-[11px] uppercase tracking-[0.16em] text-teal">{roleLabel(user.role)}</p>
-                <p className="mt-2 font-medium text-forest">{user.name}</p>
+                <p className="mt-2 font-medium text-heading">{user.name}</p>
                 <p className="text-xs text-mute">{user.branch}</p>
               </button>
             ))}

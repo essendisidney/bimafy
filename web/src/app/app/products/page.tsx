@@ -18,7 +18,7 @@ export default function ProductsPage() {
       {loading ? <p className="text-sm text-mute">Loading products…</p> : null}
       <div className="grid gap-4 md:grid-cols-2">
         {products.map((p) => (
-          <Link key={p.id} href={`/app/products/${p.slug}`} className="rounded-2xl border border-line bg-white p-5 hover:border-teal">
+          <Link key={p.id} href={`/app/products/${p.slug}`} className="rounded-2xl border border-line bg-surface p-5 hover:border-teal">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-xs uppercase tracking-wide text-teal">{p.code}</p>

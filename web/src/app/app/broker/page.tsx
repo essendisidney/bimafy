@@ -165,7 +165,7 @@ export default function BrokerPage() {
         <Card className="space-y-3 p-5">
           <h2 className="font-display text-xl">Bulk schedule import</h2>
           {leadsError ? (
-            <p role="alert" className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-800">
+            <p role="alert" className="rounded-xl border border-danger/25 bg-danger/10 px-3 py-2 text-sm text-danger">
               {leadsError}
             </p>
           ) : null}

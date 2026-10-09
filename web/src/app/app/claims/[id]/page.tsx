@@ -1,5 +1,6 @@
 "use client";
 
+import { SearchX } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { updateClaimRemote, useClaimsBook } from "@/lib/data";
@@ -8,7 +9,7 @@ import { money } from "@/lib/format";
 import { demoUsers } from "@/lib/seed";
 import { platformStore, usePlatform } from "@/lib/store";
 import type { Claim, ClaimStatus, UserRole } from "@/lib/types";
-import { Badge, Button, Card, Field, PageHeader, inputClass } from "@/components/ui";
+import { Badge, Button, Card, DetailSkeleton, Empty, Field, PageHeader, inputClass } from "@/components/ui";
 import { useState } from "react";
 import Link from "next/link";
 
@@ -47,8 +48,17 @@ export default function ClaimDetailPage() {
   const [evidenceName, setEvidenceName] = useState("additional_evidence.txt");
   const [evidenceNote, setEvidenceNote] = useState("");
 
-  if (loading) return <p className="text-sm text-mute">Loading claim…</p>;
-  if (!claim) return <p>Claim not found.</p>;
+  if (loading) return <DetailSkeleton label="Loading claim" />;
+  if (!claim) return (
+      <Card>
+        <Empty
+          icon={SearchX}
+          title="Claim not found"
+          hint="Check the claim number, or search for it with ⌘K."
+          action={<Button href="/app/claims" variant="secondary">All claims</Button>}
+        />
+      </Card>
+    );
 
   const role = user?.role ?? "participant";
   const isMine =
@@ -101,7 +111,7 @@ export default function ClaimDetailPage() {
             <Badge status={claim.status} />
             <span
               className={`rounded-full px-2.5 py-0.5 text-xs ${
-                claim.fraudScore >= 60 ? "bg-rose-50 text-rose-800" : "bg-emerald-50 text-emerald-800"
+                claim.fraudScore >= 60 ? "bg-danger/10 text-danger" : "bg-teal/10 text-teal"
               }`}
             >
               Fraud score {claim.fraudScore}
@@ -285,7 +295,7 @@ export default function ClaimDetailPage() {
             {steps.map((step) => (
               <li
                 key={step}
-                className={`rounded-xl px-3 py-2 ${step === claim.status ? "bg-forest text-sand" : "bg-sand"}`}
+                className={`rounded-xl px-3 py-2 ${step === claim.status ? "bg-forest text-champagne" : "bg-sand"}`}
               >
                 {step.replaceAll("_", " ")}
               </li>

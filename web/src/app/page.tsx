@@ -2,6 +2,7 @@ import Link from "next/link";
 import { EnterAs } from "@/components/instant-quote";
 import { LandingHero } from "@/components/landing-hero";
 import { LangToggle } from "@/components/lang-toggle";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { modules } from "@/lib/modules";
 
 const MOAT = [
@@ -43,7 +44,7 @@ export default function Home() {
   return (
     <div className="min-h-screen atmosphere text-ink">
       <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
-        <div className="brand-mark text-3xl tracking-[0.08em] text-forest">InsuraX</div>
+        <div className="brand-mark text-3xl tracking-[0.08em] text-heading">InsuraX</div>
         <nav className="flex items-center gap-3 text-sm sm:gap-4">
           <a href="#why" className="hidden text-mute transition hover:text-ink sm:inline">
             Why InsuraX
@@ -51,6 +52,7 @@ export default function Home() {
           <a href="#agents" className="hidden text-mute transition hover:text-ink sm:inline">
             For agents
           </a>
+          <ThemeToggle className="hidden sm:flex" />
           <LangToggle />
           <Link href="/login" className="rounded-xl bg-forest px-4 py-2.5 text-champagne transition hover:bg-navy">
             Sign in
@@ -61,17 +63,17 @@ export default function Home() {
       <main>
         <LandingHero />
 
-        <section id="why" className="border-t border-line/80 bg-white/50 py-16">
+        <section id="why" className="border-t border-line/80 bg-surface/50 py-16">
           <div className="mx-auto max-w-6xl px-6">
             <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-teal">Why InsuraX</p>
-            <h2 className="mt-3 max-w-3xl font-display text-4xl text-forest md:text-5xl">
+            <h2 className="mt-3 max-w-3xl font-display text-4xl text-heading md:text-5xl">
               Others sell policies. We run the whole machine — so it gets cheaper and faster with every customer.
             </h2>
             <div className="mt-10 grid gap-px overflow-hidden rounded-2xl border border-line bg-line md:grid-cols-2 lg:grid-cols-3">
               {MOAT.map((m, i) => (
                 <div key={m.title} className="bg-paper p-6">
                   <p className="font-display text-3xl text-gold">0{i + 1}</p>
-                  <h3 className="mt-2 font-display text-2xl text-forest">{m.title}</h3>
+                  <h3 className="mt-2 font-display text-2xl text-heading">{m.title}</h3>
                   <p className="mt-2 text-sm leading-relaxed text-mute">{m.body}</p>
                 </div>
               ))}
@@ -94,7 +96,7 @@ export default function Home() {
                 <EnterAs
                   userId="u-agent"
                   href="/app/agent"
-                  className="mt-8 inline-flex rounded-xl bg-gold px-5 py-3 text-sm font-medium text-ink transition hover:bg-champagne"
+                  className="mt-8 inline-flex rounded-xl bg-gold px-5 py-3 text-sm font-medium text-forest transition hover:bg-champagne"
                 >
                   Try the agent desk — no sign-up
                 </EnterAs>
@@ -111,15 +113,15 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="platform" className="border-t border-line/80 bg-white/50 py-16">
+        <section id="platform" className="border-t border-line/80 bg-surface/50 py-16">
           <div className="mx-auto max-w-6xl px-6">
             <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-teal">Under the hood</p>
-            <h2 className="mt-3 font-display text-4xl text-forest md:text-5xl">Ten products. One source of truth.</h2>
+            <h2 className="mt-3 font-display text-4xl text-heading md:text-5xl">Ten products. One source of truth.</h2>
             <div className="mt-10 grid gap-px overflow-hidden rounded-2xl border border-line bg-line md:grid-cols-2 lg:grid-cols-5">
               {modules.map((mod) => (
-                <div key={mod.slug} className="bg-paper p-5 transition hover:bg-white">
+                <div key={mod.slug} className="bg-paper p-5 transition hover:bg-surface">
                   <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-teal">{mod.code}</p>
-                  <h3 className="mt-2 font-display text-2xl text-forest">{mod.name.replace("InsuraX ", "")}</h3>
+                  <h3 className="mt-2 font-display text-2xl text-heading">{mod.name.replace("InsuraX ", "")}</h3>
                   <p className="mt-2 text-sm leading-relaxed text-mute">{mod.tagline}</p>
                 </div>
               ))}

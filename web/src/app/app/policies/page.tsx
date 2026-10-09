@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useAuth } from "@/lib/auth";
 import { usePoliciesBook } from "@/lib/data";
 import { money } from "@/lib/format";
-import { Badge, Card, PageHeader, Table } from "@/components/ui";
+import { Badge, Card, PageHeader, SkeletonRows, Table } from "@/components/ui";
 
 export default function PoliciesPage() {
   const { user } = useAuth();
@@ -19,7 +19,7 @@ export default function PoliciesPage() {
         description="PAS is the heart of the platform — full lifecycle with digital certificates and audit history."
       />
       <Card className="p-2">
-        {loading ? <p className="p-4 text-sm text-mute">Loading policies…</p> : null}
+        {loading ? <SkeletonRows label="Loading policies" /> : null}
         <Table headers={["Policy", "Participant", "Product", "Status", "Contribution", "Expiry", ""]}>
           {rows.map((p) => (
             <tr key={p.id} className="border-b border-line/70">

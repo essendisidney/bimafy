@@ -19,7 +19,7 @@ export default function ChannelsPage() {
         <WhatsAppSimulator />
       </div>
       <Card className="mt-4 space-y-2 p-5 text-sm text-mute">
-        <p className="font-medium text-forest">Production webhooks</p>
+        <p className="font-medium text-heading">Production webhooks</p>
         <p>
           USSD: <code className="text-ink">POST /api/channels/ussd</code> (Africa&apos;s Talking CON/END)
         </p>
@@ -66,7 +66,7 @@ function UssdSimulator() {
         <Field label="MSISDN">
           <input className={inputClass} value={phone} onChange={(e) => setPhone(e.target.value)} />
         </Field>
-        <div className="mx-auto w-full max-w-xs rounded-[1.5rem] border border-line bg-ink p-3 shadow-lift">
+        <div className="theme-light mx-auto w-full max-w-xs rounded-[1.5rem] border border-line bg-ink p-3 shadow-lift">
           <div className="rounded-xl bg-[#c5d4a1] px-3 py-4 font-mono text-xs leading-relaxed text-ink whitespace-pre-wrap min-h-40">
             {screen}
           </div>
@@ -176,7 +176,7 @@ function WhatsAppSimulator() {
           {handoff ? <Badge status="pending" /> : <Badge status="active" />}
         </div>
       </div>
-      <div className="flex h-[420px] flex-col bg-[#ece5dd]">
+      <div className="theme-light flex h-[420px] flex-col bg-[#ece5dd]">
         <div className="flex-1 space-y-2 overflow-y-auto p-4">
           {messages.map((m) => (
             <div
@@ -185,8 +185,8 @@ function WhatsAppSimulator() {
                 m.from === "customer"
                   ? "ml-auto bg-[#dcf8c6] text-ink"
                   : m.from === "agent"
-                    ? "bg-white text-ink ring-1 ring-gold/40"
-                    : "bg-white text-ink"
+                    ? "bg-surface text-ink ring-1 ring-gold/40"
+                    : "bg-surface text-ink"
               }`}
             >
               <p className="text-[10px] uppercase tracking-wide text-mute">
@@ -196,7 +196,7 @@ function WhatsAppSimulator() {
             </div>
           ))}
         </div>
-        <div className="border-t border-line bg-white p-3">
+        <div className="border-t border-line bg-surface p-3">
           <div className="mb-2 flex flex-wrap gap-1.5">
             {quick.map((q) => (
               <button

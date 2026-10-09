@@ -117,9 +117,9 @@ export default function DashboardPage() {
               ["Open claims", claims.filter((c) => !["paid", "closed", "rejected"].includes(c.status)).length, "/app/claims"],
               ["AI actions", quotes.filter((q) => q.status === "referred").length + claims.filter((c) => c.fraudScore >= 60).length, "/app/ai"],
             ].map(([label, value, href]) => (
-              <Link key={String(label)} href={String(href)} className="rounded-xl border border-line bg-white px-4 py-3 hover:border-teal">
+              <Link key={String(label)} href={String(href)} className="rounded-xl border border-line bg-surface px-4 py-3 hover:border-teal">
                 <p className="text-[10px] uppercase tracking-[0.16em] text-mute">{label}</p>
-                <p className="mt-1 font-display text-2xl text-forest">{value}</p>
+                <p className="mt-1 font-display text-2xl text-heading">{value}</p>
               </Link>
             ))}
           </div>

@@ -50,7 +50,7 @@ export default function IntegrationsPage() {
       </div>
 
       <Card className="mt-4 space-y-2 overflow-x-auto p-5 text-sm text-mute">
-        <p className="font-medium text-forest">Partner endpoints</p>
+        <p className="font-medium text-heading">Partner endpoints</p>
         <pre className="text-xs text-ink">{`POST /api/partners/iprs/verify
 POST /api/partners/crb/check
 POST /api/partners/ntsa/vehicle
@@ -106,7 +106,7 @@ function CrbPanel() {
         <Button disabled={loading} onClick={run}>
           {loading ? "Checking…" : "Run CRB enquiry"}
         </Button>
-        {error ? <p className="text-sm text-rose-700">{error}</p> : null}
+        {error ? <p className="text-sm text-danger">{error}</p> : null}
         {result ? (
           <div className="space-y-2 rounded-xl border border-line bg-sand/40 p-3 text-sm">
             <div className="flex items-center justify-between gap-2">
@@ -295,7 +295,7 @@ function IprsPanel() {
         <Button disabled={loading} onClick={run}>
           {loading ? "Verifying…" : "Verify ID"}
         </Button>
-        {error ? <p className="text-sm text-rose-700">{error}</p> : null}
+        {error ? <p className="text-sm text-danger">{error}</p> : null}
         {result ? (
           <div className="space-y-2 rounded-xl border border-line bg-sand/40 p-3 text-sm">
             <div className="flex items-center justify-between gap-2">
@@ -365,7 +365,7 @@ function NtsaPanel() {
         <Button disabled={loading} onClick={run}>
           {loading ? "Looking up…" : "Lookup vehicle"}
         </Button>
-        {error ? <p className="text-sm text-rose-700">{error}</p> : null}
+        {error ? <p className="text-sm text-danger">{error}</p> : null}
         {result ? (
           <div className="space-y-2 rounded-xl border border-line bg-sand/40 p-3 text-sm">
             <div className="flex items-center justify-between gap-2">
@@ -389,7 +389,7 @@ function NtsaPanel() {
               <p className="text-mute">Vehicle not found.</p>
             )}
             {result.riskFlags.length ? (
-              <ul className="space-y-1 text-xs text-[#8a6d12]">
+              <ul className="space-y-1 text-xs text-gold-ink">
                 {result.riskFlags.map((f) => (
                   <li key={f}>⚠ {f}</li>
                 ))}
@@ -469,7 +469,7 @@ function OcrPanel() {
         <Button disabled={loading} onClick={run}>
           {loading ? "Extracting…" : "Run OCR"}
         </Button>
-        {error ? <p className="text-sm text-rose-700">{error}</p> : null}
+        {error ? <p className="text-sm text-danger">{error}</p> : null}
         {result ? (
           <div className="space-y-2 rounded-xl border border-line bg-sand/40 p-3 text-sm">
             <div className="flex items-center justify-between gap-2">
