@@ -25,7 +25,7 @@ test("referred, recently-touched quoted lead scores hot; stale one cools", () =>
   const cold = scoreLead(lead({ source: "bulk_import", createdAt: "2026-08-01T00:00:00Z" }), now);
   assert.equal(hot.temperature, "hot");
   assert.equal(cold.temperature, "cold");
-  assert.ok(cold.reasons.some((r) => r.includes("no follow-up")));
+  assert.ok(cold.reasons.some((r) => r.code === "no_followup"));
 });
 
 test("agenda buckets overdue / today / unscheduled and skips closed leads", () => {
@@ -52,7 +52,7 @@ test("renewal queue flags failed collections and keeps win-backs within grace", 
   );
   assert.deepEqual(q.map((r) => r.policy.id), ["p2", "p"]);
   assert.equal(q[0].bucket, "win_back");
-  assert.ok(q[1].drivers.some((d) => d.includes("failed")));
+  assert.ok(q[1].drivers.some((d) => d.code === "failed_collections" && d.n === 1));
 });
 
 test("commission earned on collections only, with first-year clawback", () => {
@@ -73,6 +73,7 @@ test("forecast projects run-rate to year end", () => {
 test("cross-sell suggests medical to motor owners", () => {
   const rows = crossSell([policy({})], [{ id: "c1", name: "C", phone: "1", dob: "1990-01-01" }], lineOf, now);
   assert.equal(rows[0].suggestions[0].line, "medical");
+  assert.equal(rows[0].suggestions[0].reason, "drives_without_medical");
 });
 
 test("msisdn normalises Kenyan numbers", () => {
