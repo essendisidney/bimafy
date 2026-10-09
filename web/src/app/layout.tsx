@@ -17,11 +17,11 @@ const cormorant = Cormorant_Garamond({
 });
 
 export const metadata: Metadata = {
-  title: "InsuraX — The End-to-End Insurance Operating Platform",
+  title: "Bimafy — The End-to-End Insurance Operating Platform",
   description:
-    "InsuraX is the technology infrastructure that runs an insurer, broker, MGA, agent network, or embedded-insurance business end to end.",
-  applicationName: "InsuraX",
-  appleWebApp: { capable: true, title: "InsuraX", statusBarStyle: "black-translucent" },
+    "Bimafy is the technology infrastructure that runs an insurer, broker, MGA, agent network, or embedded-insurance business end to end.",
+  applicationName: "Bimafy",
+  appleWebApp: { capable: true, title: "Bimafy", statusBarStyle: "black-translucent" },
   icons: {
     icon: [{ url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" }],
     apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180" }],

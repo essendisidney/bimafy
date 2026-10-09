@@ -14,7 +14,7 @@ export default function AnalyticsPage() {
   return (
     <div>
       <PageHeader
-        eyebrow="InsuraX Data"
+        eyebrow="Bimafy Data"
         title="Analytics & regulatory cockpit"
         description="Live GWP, NWP, loss & combined ratios from the PAS book — charts update as you quote, bind, claim and pay."
       />

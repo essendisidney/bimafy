@@ -22,12 +22,12 @@ import type {
 } from "./types";
 
 export const operator = {
-  name: "InsuraX Kenya",
+  name: "Bimafy Kenya",
   license: "IRA/INS/2024/014",
   model: "Wakala",
   wakalaRate: 0.15,
   currency: "KES",
-  shariahBoard: "InsuraX Shariah Supervisory Board",
+  shariahBoard: "Bimafy Shariah Supervisory Board",
 };
 
 export const demoUsers: SessionUser[] = [

@@ -123,7 +123,7 @@ export default function CompliancePage() {
   function downloadIraPack() {
     const pack = {
       generatedAt: new Date().toISOString(),
-      operator: "InsuraX Kenya",
+      operator: "Bimafy Kenya",
       license: "IRA/INS/2024/014",
       retentionNote: "Insurance records retained 7–10 years per IRA guidance.",
       summary: {

@@ -25,7 +25,7 @@ export default function IntegrationsPage() {
   return (
     <div>
       <PageHeader
-        eyebrow="InsuraX Connect"
+        eyebrow="Bimafy Connect"
         title="APIs & embedded insurance"
         description="Verify identity, credit, vehicles and documents before binding risk. Embed cover via /api/v1 and receive webhooks on bind, FNOL, and payment."
       />

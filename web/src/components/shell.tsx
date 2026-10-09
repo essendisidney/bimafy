@@ -70,7 +70,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }, [items]);
 
   if (!ready || !user) {
-    return <div className="grid min-h-screen place-items-center atmosphere text-mute">Loading InsuraX desk…</div>;
+    return <div className="grid min-h-screen place-items-center atmosphere text-mute">Loading Bimafy desk…</div>;
   }
 
   const current = items.filter((i) => isActive(pathname, i.href)).sort((a, b) => b.href.length - a.href.length)[0];
@@ -123,8 +123,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           )}
         >
           <div className={cn("flex items-center py-5", collapsed ? "justify-center px-2" : "justify-between px-5")}>
-            <Link href="/app/dashboard" className="brand-mark text-gold" aria-label="InsuraX home">
-              {collapsed ? <span className="text-2xl">X</span> : <span className="text-3xl tracking-[0.08em]">InsuraX</span>}
+            <Link href="/app/dashboard" className="brand-mark text-gold" aria-label="Bimafy home">
+              {collapsed ? <span className="text-2xl">B</span> : <span className="text-3xl tracking-[0.08em]">Bimafy</span>}
             </Link>
           </div>
           <div className="min-h-0 flex-1 overflow-y-auto">{navList(collapsed)}</div>
@@ -148,7 +148,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <div className="absolute inset-0 bg-black/50 animate-fade-in" onClick={() => setDrawerOpen(false)} />
             <aside className="absolute inset-y-0 left-0 flex w-[85%] max-w-xs flex-col atmosphere-deep text-champagne shadow-lift animate-slide-in-left">
               <div className="flex items-center justify-between px-5 py-5">
-                <span className="brand-mark text-3xl tracking-[0.08em] text-gold">InsuraX</span>
+                <span className="brand-mark text-3xl tracking-[0.08em] text-gold">Bimafy</span>
                 <button
                   onClick={() => setDrawerOpen(false)}
                   className="grid h-9 w-9 place-items-center rounded-xl text-champagne/80 hover:bg-white/10"
@@ -176,7 +176,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             >
               <Menu className="h-[18px] w-[18px]" aria-hidden />
             </button>
-            <span className="brand-mark text-xl text-heading md:hidden">InsuraX</span>
+            <span className="brand-mark text-xl text-heading md:hidden">Bimafy</span>
 
             <button
               onClick={() => setPaletteOpen(true)}

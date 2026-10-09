@@ -66,7 +66,7 @@ const COPY = {
     cta: "Get covered — pay with M-Pesa",
     share: "Send this quote on WhatsApp",
     shareText: (product: string, price: string, extra: string, url: string) =>
-      `My InsuraX quote: ${product} — ${price}${extra}. See yours in seconds: ${url}`,
+      `My Bimafy quote: ${product} — ${price}${extra}. See yours in seconds: ${url}`,
   },
   sw: {
     eyebrow: "Bei yako, sasa hivi",
@@ -83,7 +83,7 @@ const COPY = {
     cta: "Pata bima — lipa kwa M-Pesa",
     share: "Tuma bei hii kwa WhatsApp",
     shareText: (product: string, price: string, extra: string, url: string) =>
-      `Bei yangu ya InsuraX: ${product} — ${price}${extra}. Ona yako kwa sekunde: ${url}`,
+      `Bei yangu ya Bimafy: ${product} — ${price}${extra}. Ona yako kwa sekunde: ${url}`,
   },
 } as const;
 

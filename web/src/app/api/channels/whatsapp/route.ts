@@ -55,7 +55,7 @@ export async function GET(request: Request) {
   }
 
   return NextResponse.json({
-    service: "InsuraX WhatsApp",
+    service: "Bimafy WhatsApp",
     webhook: "/api/channels/whatsapp",
     verifyTokenEnv: "WHATSAPP_VERIFY_TOKEN",
   });

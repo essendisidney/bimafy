@@ -40,7 +40,7 @@ export default function DashboardPage() {
       <PageHeader
         eyebrow={`Home · ${mode}`}
         title={`Welcome, ${user.name.split(" ")[0]}`}
-        description="InsuraX runs the full insurance value chain. This desk is filtered to your role."
+        description="Bimafy runs the full insurance value chain. This desk is filtered to your role."
         actions={<Button href="/app/quotes/new">New quotation</Button>}
       />
 

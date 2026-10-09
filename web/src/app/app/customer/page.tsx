@@ -38,7 +38,7 @@ export default function CustomerPage() {
   return (
     <div>
       <PageHeader
-        eyebrow="InsuraX Customer"
+        eyebrow="Bimafy Customer"
         title={mine ? "Your self-service desk" : "Customer self-service"}
         description={
           mine

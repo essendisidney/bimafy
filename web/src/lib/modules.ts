@@ -1,4 +1,4 @@
-export type InsuraXModule = {
+export type BimafyModule = {
   slug: string;
   code: string;
   name: string;
@@ -8,14 +8,14 @@ export type InsuraXModule = {
   capabilities: string[];
 };
 
-export const INSURAX_TAGLINE = "The End-to-End Insurance Operating Platform";
-export const INSURAX_IDEA = "One platform. Every insurance workflow. One source of truth.";
+export const BIMAFY_TAGLINE = "The End-to-End Insurance Operating Platform";
+export const BIMAFY_IDEA = "One platform. Every insurance workflow. One source of truth.";
 
-export const modules: InsuraXModule[] = [
+export const modules: BimafyModule[] = [
   {
     slug: "core",
     code: "Core",
-    name: "InsuraX Core",
+    name: "Bimafy Core",
     tagline: "Policy administration",
     description: "Issue, endorse, renew, suspend, and certificate every policy from a single PAS ledger.",
     href: "/app/policies",
@@ -24,7 +24,7 @@ export const modules: InsuraXModule[] = [
   {
     slug: "risk",
     code: "Risk",
-    name: "InsuraX Risk",
+    name: "Bimafy Risk",
     tagline: "Underwriting & risk scoring",
     description: "Straight-through underwriting with explainable loads, referrals, and credit/identity hooks.",
     href: "/app/underwriting",
@@ -33,7 +33,7 @@ export const modules: InsuraXModule[] = [
   {
     slug: "claims",
     code: "Claims",
-    name: "InsuraX Claims",
+    name: "Bimafy Claims",
     tagline: "Digital claims management",
     description: "FNOL to payout with photos, OCR, assessor assignment, approvals, and SLA clocks.",
     href: "/app/claims",
@@ -42,7 +42,7 @@ export const modules: InsuraXModule[] = [
   {
     slug: "pay",
     code: "Pay",
-    name: "InsuraX Pay",
+    name: "Bimafy Pay",
     tagline: "Premiums, collections & reconciliation",
     description: "M-Pesa STK, cards, and ledger reconciliation against every policy installment.",
     href: "/app/payments",
@@ -51,7 +51,7 @@ export const modules: InsuraXModule[] = [
   {
     slug: "fraud",
     code: "Fraud",
-    name: "InsuraX Fraud",
+    name: "Bimafy Fraud",
     tagline: "Fraud & anomaly detection",
     description: "Early-claim, duplicate, frequency, and amount-outlier signals before money moves.",
     href: "/app/fraud",
@@ -60,7 +60,7 @@ export const modules: InsuraXModule[] = [
   {
     slug: "connect",
     code: "Connect",
-    name: "InsuraX Connect",
+    name: "Bimafy Connect",
     tagline: "APIs & embedded insurance",
     description: "Quote, bind, and claim from banks, SACCOs, ride-hailing, and retail checkouts.",
     href: "/app/integrations",
@@ -69,7 +69,7 @@ export const modules: InsuraXModule[] = [
   {
     slug: "agent",
     code: "Agent",
-    name: "InsuraX Agent",
+    name: "Bimafy Agent",
     tagline: "Agency / broker ecosystem",
     description: "Leads, commissions, offline field enrolment, and broker bordereaux in one network.",
     href: "/app/agent",
@@ -78,7 +78,7 @@ export const modules: InsuraXModule[] = [
   {
     slug: "ai",
     code: "AI",
-    name: "InsuraX AI",
+    name: "Bimafy AI",
     tagline: "Intelligence, automation & decisioning",
     description: "Models assist underwriting, claims triage, care, and fraud — never silently bind the book.",
     href: "/app/ai",
@@ -87,7 +87,7 @@ export const modules: InsuraXModule[] = [
   {
     slug: "data",
     code: "Data",
-    name: "InsuraX Data",
+    name: "Bimafy Data",
     tagline: "Analytics & regulatory reporting",
     description: "GWP, loss ratio, TAT, IRA-ready extracts, and an audit trail across the operating book.",
     href: "/app/analytics",
@@ -96,7 +96,7 @@ export const modules: InsuraXModule[] = [
   {
     slug: "customer",
     code: "Customer",
-    name: "InsuraX Customer",
+    name: "Bimafy Customer",
     tagline: "Customer self-service",
     description: "Buy, pay, claim, download certificates, and update KYC without calling the office.",
     href: "/app/customer",

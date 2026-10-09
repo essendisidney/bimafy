@@ -1,4 +1,4 @@
-/* InsuraX service worker: makes the app installable and usable with no signal.
+/* Bimafy service worker: makes the app installable and usable with no signal.
  *
  * - Build assets (/_next/static, content-hashed): cache first, kept across deploys
  *   so a cached page can always find its scripts.
@@ -8,7 +8,7 @@
  * - API routes, non-GET requests and other origins (Supabase) are never touched;
  *   offline writes are queued by the app itself (src/lib/outbox.ts).
  */
-const VERSION = "v1";
+const VERSION = "v2";
 const PAGES = `insurax-pages-${VERSION}`;
 const ASSETS = "insurax-assets"; // hashed file names: never needs versioning
 const STATIC = `insurax-static-${VERSION}`;

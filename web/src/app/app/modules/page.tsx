@@ -1,14 +1,14 @@
 import Link from "next/link";
-import { INSURAX_IDEA, modules } from "@/lib/modules";
+import { BIMAFY_IDEA, modules } from "@/lib/modules";
 import { Card, PageHeader } from "@/components/ui";
 
 export default function ModulesPage() {
   return (
     <div>
       <PageHeader
-        eyebrow="InsuraX platform"
+        eyebrow="Bimafy platform"
         title="The insurance operating system"
-        description={INSURAX_IDEA}
+        description={BIMAFY_IDEA}
       />
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5">
         {modules.map((mod) => (

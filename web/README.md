@@ -1,6 +1,6 @@
-# InsuraX console
+# Bimafy console
 
-Next.js operator, partner, and customer console for the InsuraX insurance operating platform.
+Next.js operator, partner, and customer console for the Bimafy insurance operating platform.
 
 ```bash
 npm install

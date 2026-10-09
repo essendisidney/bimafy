@@ -54,7 +54,7 @@ export default function AiPage() {
   return (
     <div>
       <PageHeader
-        eyebrow="InsuraX AI"
+        eyebrow="Bimafy AI"
         title="Intelligence, automation & decisioning"
         description="Models score the live book. A human still confirms every bind, payout, and decline."
       />
@@ -100,7 +100,7 @@ export default function AiPage() {
           Quote referrals use the underwriting rules engine. Claims use fraud signals (early claim, duplicates, frequency, amount).
           Renewals and failed collections come from the PAS book. OCR / IPRS / NTSA sandboxes stay on{" "}
           <Link href="/app/integrations" className="text-teal underline decoration-teal/40 underline-offset-2 hover:decoration-teal">
-            InsuraX Connect
+            Bimafy Connect
           </Link>
           .
         </p>

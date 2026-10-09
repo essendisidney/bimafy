@@ -7,7 +7,7 @@ const COPY = {
   en: {
     eyebrow: "Insurance, at the speed of M-Pesa",
     headline: "See your price before you finish reading this sentence.",
-    body: "InsuraX prices, approves and issues cover in one flow — for the person buying it, the agent selling it, and the insurer carrying it.",
+    body: "Bimafy prices, approves and issues cover in one flow — for the person buying it, the agent selling it, and the insurer carrying it.",
     doors: [
       {
         who: "I need cover",
@@ -35,7 +35,7 @@ const COPY = {
   sw: {
     eyebrow: "Bima, kwa kasi ya M-Pesa",
     headline: "Ona bei yako kabla hujamaliza kusoma sentensi hii.",
-    body: "InsuraX inapanga bei, inaidhinisha na kutoa bima kwa hatua moja — kwa anayenunua, wakala anayeuza, na kampuni inayobeba hatari.",
+    body: "Bimafy inapanga bei, inaidhinisha na kutoa bima kwa hatua moja — kwa anayenunua, wakala anayeuza, na kampuni inayobeba hatari.",
     doors: [
       {
         who: "Nahitaji bima",
