@@ -72,6 +72,10 @@ set role = 'admin',
 where email = 'admin@insurax.africa';
 ```
 
+Apply migrations with `supabase db push` (or paste each file in `supabase/migrations/` into the SQL editor, in order).
+
+Leads are stored in Supabase for signed-in users. Row-level security limits agents and brokers to their own leads, while `admin`, `branch_manager` and `call_center` see every lead in their operator. Link a login to its distributor record with `update agents set profile_id = '<auth user id>' where agent_code = 'AG-KE-0142';` (and the same on `brokers`). Local personas from the login screen stay on demo data.
+
 Optionally set Auth `app_metadata`: `{ "role": "admin", "operator_id": "00000000-0000-4000-8000-000000000001" }`.
 
 ### Partner API

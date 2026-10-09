@@ -5,12 +5,14 @@ import { computeKpis } from "@/lib/analytics";
 import { useAuth } from "@/lib/auth";
 import { useClaimsBook, usePaymentsBook, usePoliciesBook, useQuotesBook } from "@/lib/data";
 import { money, pct } from "@/lib/format";
+import { useLeads } from "@/lib/leads";
 import { usePlatform } from "@/lib/store";
 import { Badge, Button, Card, PageHeader, Stat } from "@/components/ui";
 
 export default function DashboardPage() {
   const { user, mode } = useAuth();
   const demo = usePlatform();
+  const { leads } = useLeads();
   const { policies } = usePoliciesBook();
   const { claims } = useClaimsBook();
   const { quotes } = useQuotesBook();
@@ -158,7 +160,7 @@ export default function DashboardPage() {
                       <Row href="/app/crm" title="Open care tickets" value={String(demo.tickets.filter((t) => t.status !== "resolved").length)} />
                     )}
                     {(user.role === "agent" || user.role === "admin" || user.role === "branch_manager") && (
-                      <Row href="/app/agent" title="Open leads" value={String(demo.leads.filter((l) => l.status !== "won" && l.status !== "lost").length)} />
+                      <Row href="/app/agent" title="Open leads" value={String(leads.filter((l) => l.status !== "won" && l.status !== "lost").length)} />
                     )}
                   </>
                 )}

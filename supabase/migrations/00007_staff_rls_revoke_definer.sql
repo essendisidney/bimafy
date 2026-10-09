@@ -21,10 +21,12 @@ begin
     'tax_levy_rules','underwriting_cases','underwriting_rules','workflow_definitions'
   ]
   loop
-    execute format(
-      'create policy staff_all_%I on %I for all to authenticated using (public.is_staff()) with check (public.is_staff())',
-      t, t
-    );
-  exception when duplicate_object then null;
+    begin
+      execute format(
+        'create policy staff_all_%I on %I for all to authenticated using (public.is_staff()) with check (public.is_staff())',
+        t, t
+      );
+    exception when duplicate_object then null;
+    end;
   end loop;
 end $$;

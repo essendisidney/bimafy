@@ -139,6 +139,8 @@ export type Participant = {
 
 export type Agent = {
   id: string;
+  /** Supabase agents.id when this demo agent is seeded in the database. */
+  dbId?: string;
   code: string;
   name: string;
   phone: string;
@@ -151,6 +153,8 @@ export type Agent = {
 
 export type Broker = {
   id: string;
+  /** Supabase brokers.id when this demo broker is seeded in the database. */
+  dbId?: string;
   code: string;
   name: string;
   license: string;

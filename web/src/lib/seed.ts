@@ -427,13 +427,13 @@ export const participants: Participant[] = [
 ];
 
 export const agents: Agent[] = [
-  { id: "a-1", code: "AG-KE-0142", name: "Joseph Otieno", phone: "+254722111222", branch: "Kisumu", license: "IRA-AG-88921", wallet: 42850, ytdGwp: 12840000, target: 18000000 },
-  { id: "a-2", code: "AG-KE-0208", name: "Mary Wambui", phone: "+254722333444", branch: "Nairobi CBD", license: "IRA-AG-90112", wallet: 18900, ytdGwp: 22150000, target: 25000000 },
+  { id: "a-1", dbId: "30000000-0000-4000-8000-000000000001", code: "AG-KE-0142", name: "Joseph Otieno", phone: "+254722111222", branch: "Kisumu", license: "IRA-AG-88921", wallet: 42850, ytdGwp: 12840000, target: 18000000 },
+  { id: "a-2", dbId: "30000000-0000-4000-8000-000000000002", code: "AG-KE-0208", name: "Mary Wambui", phone: "+254722333444", branch: "Nairobi CBD", license: "IRA-AG-90112", wallet: 18900, ytdGwp: 22150000, target: 25000000 },
   { id: "a-3", code: "AG-KE-0311", name: "Hassan Juma", phone: "+254722555666", branch: "Mombasa", license: "IRA-AG-77430", wallet: 7600, ytdGwp: 6420000, target: 9000000 },
 ];
 
 export const brokers: Broker[] = [
-  { id: "b-1", code: "BR-KE-07", name: "Zahra Insurance Brokers", license: "IRA-BR-2211", clients: 186, commissionRate: 0.125, ytdGwp: 28400000, wallet: 412000 },
+  { id: "b-1", dbId: "40000000-0000-4000-8000-000000000001", code: "BR-KE-07", name: "Zahra Insurance Brokers", license: "IRA-BR-2211", clients: 186, commissionRate: 0.125, ytdGwp: 28400000, wallet: 412000 },
   { id: "b-2", code: "BR-KE-19", name: "Savanna Risk Partners", license: "IRA-BR-3302", clients: 94, commissionRate: 0.1, ytdGwp: 11200000, wallet: 98000 },
 ];
 

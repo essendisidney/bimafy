@@ -26,7 +26,8 @@ import {
 } from "@/lib/engines/agency";
 import { pushNotification, withdrawCommission } from "@/lib/events/ledger";
 import { compactMoney, formatDate, money, pct } from "@/lib/format";
-import { platformStore, usePlatform } from "@/lib/store";
+import { createLead, distributorKey, logLeadActivity, newLeadId, ownsLead, useLeads } from "@/lib/leads";
+import { usePlatform } from "@/lib/store";
 import type { Lead, LeadActivity, LeadSource, LeadStatus, ProductLine } from "@/lib/types";
 import { Badge, Button, Card, Empty, Field, PageHeader, Stat, Table, cn, inputClass } from "@/components/ui";
 
@@ -58,10 +59,14 @@ function ScorePill({ lead, now }: { lead: Lead; now: Date }) {
 
 export default function AgentPage() {
   const { user } = useAuth();
-  const { leads, quotes, policies, payments, balanceDeltas } = usePlatform();
+  const { quotes, policies, payments, balanceDeltas } = usePlatform();
+  const { leads, loading: leadsLoading, error: leadsError, mode } = useLeads();
   const canSwitch = user?.role === "admin" || user?.role === "branch_manager";
   const [viewAgentId, setViewAgentId] = useState<string | null>(null);
-  const agent = agents.find((a) => a.id === (viewAgentId ?? user?.agentId)) ?? agents[0];
+  const agentKey = viewAgentId ?? user?.agentId;
+  const agent = agents.find((a) => a.id === agentKey || a.dbId === agentKey) ?? agents[0];
+  // A signed-in agent always owns leads under their own agents.id, even if they aren't in the demo roster.
+  const leadOwner = mode === "supabase" && !viewAgentId && user?.agentId ? user.agentId : distributorKey(agent);
   const [tab, setTab] = useState<Tab>("Today");
   const [openLeadId, setOpenLeadId] = useState<string | null>(null);
   const [now] = useState(() => new Date());
@@ -71,7 +76,7 @@ export default function AgentPage() {
   const liveGwp = agent.ytdGwp + delta.gwp;
   const forecast = targetForecast(liveGwp, agent.target, now);
 
-  const mine = leads.filter((l) => l.agentId === agent.id);
+  const mine = leads.filter((l) => l.agentId === leadOwner || ownsLead(agent, l.agentId));
   const book = policies.filter((p) => p.agentId === agent.id);
   const agenda = followUpAgenda(mine, now);
   const pipeline = pipelineSummary(mine);
@@ -118,6 +123,15 @@ export default function AgentPage() {
         <Stat label="Wallet" value={money(liveWallet)} hint={`Net earned on book ${money(statement.totals.net)}`} />
       </div>
 
+      {leadsError ? (
+        <p role="alert" className="mt-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
+          {leadsError}
+        </p>
+      ) : null}
+      {mode === "supabase" && leadsLoading && !leads.length ? (
+        <p className="mt-4 text-sm text-mute">Loading your leads…</p>
+      ) : null}
+
       <div className="mt-6 flex gap-1 overflow-x-auto border-b border-line" role="tablist">
         {TABS.map((t) => (
           <button
@@ -140,7 +154,7 @@ export default function AgentPage() {
       <div className="mt-5">
         {tab === "Today" ? (
           <TodayTab
-            agentId={agent.id}
+            agentId={leadOwner}
             agenda={agenda}
             renewals={renewals}
             forecast={forecast}
@@ -149,8 +163,8 @@ export default function AgentPage() {
           />
         ) : null}
         {tab === "Pipeline" ? <PipelineTab leads={mine} now={now} onOpen={setOpenLeadId} /> : null}
-        {tab === "Renewals" ? <RenewalsTab items={renewals} agentId={agent.id} persistency={persistency(book)} /> : null}
-        {tab === "Book & cross-sell" ? <BookTab book={book} rows={xsell} agentId={agent.id} quotes={quotes.filter((q) => q.agentId === agent.id).length} /> : null}
+        {tab === "Renewals" ? <RenewalsTab items={renewals} agentId={leadOwner} persistency={persistency(book)} /> : null}
+        {tab === "Book & cross-sell" ? <BookTab book={book} rows={xsell} agentId={leadOwner} quotes={quotes.filter((q) => q.agentId === agent.id).length} /> : null}
         {tab === "Commissions" ? (
           <CommissionsTab statement={statement} wallet={liveWallet} onWithdraw={(amount) => withdrawCommission({ distributorId: agent.id, name: agent.name, amount, kind: "agent" })} />
         ) : null}
@@ -272,6 +286,8 @@ function TodayTab({
 }
 
 function QuickCapture({ agentId, now }: { agentId: string; now: Date }) {
+  const { operatorId } = useAuth();
+  const [saving, setSaving] = useState(false);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("+2547");
   const [productLine, setProductLine] = useState<ProductLine>("motor");
@@ -280,10 +296,11 @@ function QuickCapture({ agentId, now }: { agentId: string; now: Date }) {
   const [notes, setNotes] = useState("");
   const [saved, setSaved] = useState("");
 
-  function save() {
-    if (!name.trim() || phone.replace(/\D/g, "").length < 9) return;
-    platformStore.addLead({
-      id: `ld-${crypto.randomUUID().slice(0, 8)}`,
+  async function save() {
+    if (saving || !name.trim() || phone.replace(/\D/g, "").length < 9) return;
+    setSaving(true);
+    const ok = await createLead({
+      id: newLeadId(),
       name: name.trim(),
       phone: phone.trim(),
       productLine,
@@ -294,7 +311,12 @@ function QuickCapture({ agentId, now }: { agentId: string; now: Date }) {
       value: Number(value) || undefined,
       createdAt: new Date().toISOString(),
       nextActionAt: addDays(now, 1),
-    });
+    }, operatorId);
+    setSaving(false);
+    if (!ok) {
+      setSaved("");
+      return;
+    }
     setSaved(`${name.trim()} added — follow-up booked for tomorrow.`);
     setName("");
     setNotes("");
@@ -337,7 +359,9 @@ function QuickCapture({ agentId, now }: { agentId: string; now: Date }) {
       <Field label="Notes">
         <textarea className={inputClass} rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} />
       </Field>
-      <Button onClick={save}>Save lead</Button>
+      <Button onClick={save} disabled={saving}>
+        {saving ? "Saving…" : "Save lead"}
+      </Button>
       {saved ? <p className="text-sm text-teal">{saved}</p> : null}
     </Card>
   );
@@ -409,7 +433,7 @@ function LeadDrawer({ lead, agentName, now, onClose }: { lead: Lead; agentName: 
 
   function log() {
     if (!summary.trim()) return;
-    platformStore.logLeadActivity(
+    void logLeadActivity(
       lead.id,
       { kind, summary: summary.trim() },
       { nextActionAt: followUp, ...(lead.status === "new" && kind !== "note" ? { status: "contacted" as const } : {}) },
@@ -418,7 +442,7 @@ function LeadDrawer({ lead, agentName, now, onClose }: { lead: Lead; agentName: 
   }
 
   function move(status: LeadStatus) {
-    platformStore.logLeadActivity(
+    void logLeadActivity(
       lead.id,
       { kind: "status", summary: `Moved to ${status}${status === "lost" && lostReason ? ` — ${lostReason}` : ""}` },
       { status, ...(status === "lost" ? { lostReason: lostReason || "Not specified" } : {}) },
@@ -570,7 +594,8 @@ function RiskBadge({ level }: { level: RenewalItem["riskLabel"] }) {
 }
 
 function RenewalsTab({ items, agentId, persistency: rate }: { items: RenewalItem[]; agentId: string; persistency: number }) {
-  const { leads } = usePlatform();
+  const { leads } = useLeads();
+  const { operatorId } = useAuth();
   const [sent, setSent] = useState<Record<string, boolean>>({});
   const buckets: { key: RenewalItem["bucket"]; title: string }[] = [
     { key: "win_back", title: "Win-back (expired ≤60d)" },
@@ -591,8 +616,8 @@ function RenewalsTab({ items, agentId, persistency: rate }: { items: RenewalItem
 
   function toPipeline(r: RenewalItem) {
     const participant = participants.find((p) => p.id === r.policy.participantId);
-    platformStore.addLead({
-      id: `ld-${crypto.randomUUID().slice(0, 8)}`,
+    void createLead({
+      id: newLeadId(),
       name: r.policy.participantName,
       phone: participant?.phone ?? "",
       productLine: lineOf(r.policy.productId) ?? "motor",
@@ -603,7 +628,7 @@ function RenewalsTab({ items, agentId, persistency: rate }: { items: RenewalItem
       source: "renewal",
       createdAt: new Date().toISOString(),
       nextActionAt: new Date().toISOString().slice(0, 10),
-    });
+    }, operatorId);
   }
 
   const inPipeline = (number: string) => leads.some((l) => l.source === "renewal" && l.notes.includes(number));
@@ -686,7 +711,8 @@ function BookTab({
   agentId: string;
   quotes: number;
 }) {
-  const { leads } = usePlatform();
+  const { leads } = useLeads();
+  const { operatorId } = useAuth();
   const opportunity = rows.reduce((s, r) => s + r.suggestions.reduce((x, y) => x + y.value, 0), 0);
   const already = (phone: string, line: ProductLine) => leads.some((l) => l.phone === phone && l.productLine === line && l.agentId === agentId);
 
@@ -740,8 +766,8 @@ function BookTab({
                       className="!px-2 !py-1 text-xs"
                       disabled={already(r.participant.phone, s.line)}
                       onClick={() =>
-                        platformStore.addLead({
-                          id: `ld-${crypto.randomUUID().slice(0, 8)}`,
+                        void createLead({
+                          id: newLeadId(),
                           name: r.participant.name,
                           phone: r.participant.phone,
                           productLine: s.line,
@@ -752,7 +778,7 @@ function BookTab({
                           source: "referral",
                           createdAt: new Date().toISOString(),
                           nextActionAt: new Date().toISOString().slice(0, 10),
-                        })
+                        }, operatorId)
                       }
                     >
                       {already(r.participant.phone, s.line) ? "In pipeline" : "+ Lead"}
