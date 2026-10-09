@@ -1,5 +1,6 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Cormorant_Garamond, Outfit } from "next/font/google";
+import { ServiceWorkerRegister } from "@/components/pwa";
 import { AuthProvider } from "@/lib/auth";
 import { THEME_BOOT_SCRIPT } from "@/lib/theme-boot";
 import "./globals.css";
@@ -19,6 +20,20 @@ export const metadata: Metadata = {
   title: "InsuraX — The End-to-End Insurance Operating Platform",
   description:
     "InsuraX is the technology infrastructure that runs an insurer, broker, MGA, agent network, or embedded-insurance business end to end.",
+  applicationName: "InsuraX",
+  appleWebApp: { capable: true, title: "InsuraX", statusBarStyle: "black-translucent" },
+  icons: {
+    icon: [{ url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" }],
+    apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180" }],
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#f2f5f8" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a1220" },
+  ],
+  viewportFit: "cover",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -30,6 +45,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       </head>
       <body className="min-h-full bg-paper font-sans text-ink">
         <AuthProvider>{children}</AuthProvider>
+        <ServiceWorkerRegister />
       </body>
     </html>
   );

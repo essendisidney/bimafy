@@ -40,7 +40,7 @@ import {
   type WaTemplate,
 } from "@/lib/i18n/agency";
 import { useLang, type Lang } from "@/lib/lang";
-import { createLead, distributorKey, logLeadActivity, newLeadId, ownsLead, useLeads } from "@/lib/leads";
+import { createLead, distributorKey, logLeadActivity, newLeadId, ownsLead, pendingLeadWrites, useLeads } from "@/lib/leads";
 import { usePlatform } from "@/lib/store";
 import type { Lead, LeadActivity, LeadSource, LeadStatus, ProductLine } from "@/lib/types";
 import { LangToggle } from "@/components/lang-toggle";
@@ -377,7 +377,7 @@ function QuickCapture({ agentId, now }: { agentId: string; now: Date }) {
   const [source, setSource] = useState<LeadSource>("referral");
   const [value, setValue] = useState("");
   const [notes, setNotes] = useState("");
-  const [savedName, setSavedName] = useState("");
+  const [saved, setSaved] = useState<{ name: string; queued: boolean } | null>(null);
 
   async function save() {
     if (saving || !name.trim() || phone.replace(/\D/g, "").length < 9) return;
@@ -400,10 +400,10 @@ function QuickCapture({ agentId, now }: { agentId: string; now: Date }) {
     );
     setSaving(false);
     if (!ok) {
-      setSavedName("");
+      setSaved(null);
       return;
     }
-    setSavedName(name.trim());
+    setSaved({ name: name.trim(), queued: pendingLeadWrites() > 0 });
     setName("");
     setNotes("");
     setValue("");
@@ -448,7 +448,11 @@ function QuickCapture({ agentId, now }: { agentId: string; now: Date }) {
       <Button onClick={save} disabled={saving}>
         {saving ? t.capture.saving : t.capture.save}
       </Button>
-      {savedName ? <p className="text-sm text-teal">{t.capture.saved(savedName)}</p> : null}
+      {saved ? (
+        <p role="status" className={saved.queued ? "text-sm text-gold-ink" : "text-sm text-teal"}>
+          {saved.queued ? t.capture.savedOffline(saved.name) : t.capture.saved(saved.name)}
+        </p>
+      ) : null}
     </Card>
   );
 }
