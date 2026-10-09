@@ -9,6 +9,7 @@ import { roleLabel } from "@/lib/format";
 import { primaryNav, visibleNav, type NavItem } from "@/lib/nav";
 import { setFlag, useFlag } from "@/lib/prefs";
 import { CommandPalette } from "./command-palette";
+import { InstallButton, SyncStatus, WarmCurrentPage } from "./pwa";
 import { ThemeToggle } from "./theme-toggle";
 import { NAV_ICONS } from "./nav-icons";
 import { cn } from "./ui";
@@ -157,6 +158,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 </button>
               </div>
               <div className="min-h-0 flex-1 overflow-y-auto">{navList(false, () => setDrawerOpen(false))}</div>
+              <InstallButton variant="menu" className="border-t border-white/10 px-2 py-2" />
               <div className="flex items-center justify-between border-t border-white/10 px-5 py-4 text-xs text-champagne/60">
                 <span>Appearance</span>
                 <ThemeToggle />
@@ -166,7 +168,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         ) : null}
 
         <div className="flex min-w-0 flex-1 flex-col">
-          <header className="sticky top-0 z-20 flex items-center gap-3 border-b border-line bg-paper/85 px-4 py-3 backdrop-blur md:px-8">
+          <header className="sticky top-0 z-20 flex items-center gap-3 border-b border-line bg-paper/85 px-4 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))] backdrop-blur md:px-8">
             <button
               className="grid h-9 w-9 place-items-center rounded-xl border border-line md:hidden"
               onClick={() => setDrawerOpen(true)}
@@ -188,6 +190,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </button>
 
             <div className="flex items-center gap-3 md:ml-auto">
+              <SyncStatus />
+              <InstallButton className="hidden md:block" />
               <ThemeToggle className="hidden sm:flex" />
               <div className="hidden text-right sm:block">
                 <p className="text-sm font-medium text-heading">{user.name}</p>
@@ -247,6 +251,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       </nav>
 
+      <WarmCurrentPage />
       {paletteOpen ? <CommandPalette user={user} onClose={() => setPaletteOpen(false)} /> : null}
     </div>
   );

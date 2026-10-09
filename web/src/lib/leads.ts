@@ -5,6 +5,7 @@ import { useAuth } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { defaultOperatorId, isUuid } from "@/lib/ids";
+import { applyPending, drain, enqueue, isNetworkError, readQueue, type OutboxOp, type QueuedOp, type SendResult } from "@/lib/outbox";
 import { platformStore, usePlatform } from "@/lib/store";
 import type { Agent, Broker, Lead, LeadActivity, LeadSource, LeadStatus, ProductLine } from "@/lib/types";
 
@@ -14,6 +15,11 @@ import type { Agent, Broker, Lead, LeadActivity, LeadSource, LeadStatus, Product
  * `leads` table (RLS scopes agents/brokers to their own rows) and this module
  * holds an optimistic in-memory copy. Local personas (no session) stay on demo
  * data, since RLS would hide every row from them.
+ *
+ * Offline: the last server copy is cached per user, and writes made without a
+ * connection go to an outbox (lib/outbox.ts) that replays in order when the
+ * connection returns. Only network failures are queued; real rejections (RLS,
+ * validation) still roll back and show an error.
  */
 
 export type DbLead = {
@@ -96,8 +102,16 @@ function sb(): any {
   return createClient();
 }
 
-type Snapshot = { leads: Lead[]; loading: boolean; error: string | null };
-let snapshot: Snapshot = { leads: [], loading: false, error: null };
+type Snapshot = {
+  leads: Lead[];
+  loading: boolean;
+  error: string | null;
+  /** Writes waiting in the outbox for a connection. */
+  pending: number;
+  /** The last load fell back to the cached copy because the network was down. */
+  offline: boolean;
+};
+let snapshot: Snapshot = { leads: [], loading: false, error: null, pending: 0, offline: false };
 let loadedFor: string | null = null;
 const listeners = new Set<() => void>();
 
@@ -113,13 +127,124 @@ function subscribe(listener: () => void) {
 
 const getSnapshot = () => snapshot;
 
+/** Lead changes saved on this device that haven't reached the server yet. */
+export const pendingLeadWrites = () => snapshot.pending;
+
+// ---------------------------------------------------------------- offline
+
+const outboxKey = () => `insurax.outbox.${remoteUser}`;
+const cacheKey = () => `insurax.leads.${remoteUser}`;
+
+function storage(): Storage | null {
+  try {
+    return typeof window === "undefined" ? null : window.localStorage;
+  } catch {
+    return null;
+  }
+}
+
+function queued(): QueuedOp[] {
+  const s = storage();
+  return s && remoteUser ? readQueue(s, outboxKey()) : [];
+}
+
+function cacheRows(rows: Lead[]) {
+  try {
+    storage()?.setItem(cacheKey(), JSON.stringify(rows));
+  } catch {
+    // Quota or blocked storage: offline view just won't have the latest copy.
+  }
+}
+
+function cachedRows(): Lead[] {
+  try {
+    const raw = storage()?.getItem(cacheKey());
+    return raw ? (JSON.parse(raw) as Lead[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+const isOnline = () => typeof navigator === "undefined" || navigator.onLine !== false;
+
+/** Queue a write for later and keep the optimistic copy on screen. */
+function queue(op: OutboxOp) {
+  const s = storage();
+  if (!s || !remoteUser) return false;
+  const ops = enqueue(s, outboxKey(), op);
+  set({ pending: ops.length, error: null });
+  return true;
+}
+
+async function send(op: OutboxOp): Promise<SendResult> {
+  if (op.kind === "create") {
+    const { error } = await sb().from("leads").insert(leadRow(op.lead, op.operatorId));
+    if (!error) return { status: "ok" };
+    if (isNetworkError(error)) return { status: "retry" };
+    // Already there: an earlier attempt landed but its response was lost.
+    if (error.code === "23505") return { status: "ok" };
+    return { status: "drop", reason: `Lead not saved: ${error.message}` };
+  }
+  if (op.kind === "update") {
+    // RLS hides rows it denies, so a blocked update is "0 rows", not an error.
+    const { data, error } = await sb().from("leads").update(patchRow(op.patch)).eq("id", op.id).select("id");
+    if (error) return isNetworkError(error) ? { status: "retry" } : { status: "drop", reason: `Lead not updated: ${error.message}` };
+    return data?.length ? { status: "ok" } : { status: "drop", reason: "Lead not updated: you no longer have access to it." };
+  }
+  const { data, error } = await sb().rpc("log_lead_activity", {
+    p_lead_id: op.id,
+    p_activity: op.activity,
+    p_patch: patchRow(op.patch),
+  });
+  if (error) return isNetworkError(error) ? { status: "retry" } : { status: "drop", reason: `Activity not saved: ${error.message}` };
+  return data?.length ? { status: "ok" } : { status: "drop", reason: "Activity not saved: you no longer have access to this lead." };
+}
+
+let draining: Promise<void> | null = null;
+
+/** Replay queued writes (oldest first). Safe to call often; runs one drain at a time. */
+export function syncOutbox() {
+  const s = storage();
+  if (!remote() || !s || !isOnline()) return Promise.resolve();
+  if (draining) return draining;
+  const key = outboxKey();
+  draining = (async () => {
+    try {
+      const { remaining, dropped } = await drain(s, key, (op) => send(op).catch(() => ({ status: "retry" as const })));
+      set({ pending: remaining, ...(dropped.length ? { error: dropped.map((d) => d.reason).join(" · ") } : {}) });
+    } finally {
+      draining = null;
+    }
+  })();
+  return draining;
+}
+
+if (typeof window !== "undefined") {
+  window.addEventListener("online", () => {
+    void syncOutbox().then(() => refreshLeads());
+  });
+}
+
 export async function refreshLeads() {
   if (!remote()) return;
   loadedFor = remoteUser;
   set({ loading: true });
-  const { data, error } = await sb().from("leads").select("*").order("created_at", { ascending: false });
-  if (error) set({ loading: false, error: error.message });
-  else set({ loading: false, error: null, leads: (data ?? []).map((r: DbLead) => mapLead(r)) });
+  await syncOutbox();
+  // Known offline: don't sit through the client's retry backoff, go straight to the saved copy.
+  const { data, error } = isOnline()
+    ? await sb().from("leads").select("*").order("created_at", { ascending: false })
+    : { data: null, error: { message: "offline" } };
+  const pending = queued();
+  if (error && (!isOnline() || isNetworkError(error))) {
+    // No connection: show the last server copy plus anything queued since.
+    set({ loading: false, error: null, offline: true, pending: pending.length, leads: applyPending(cachedRows(), pending) });
+  } else if (error) {
+    set({ loading: false, error: error.message, pending: pending.length });
+  } else {
+    const rows = (data ?? []).map((r: DbLead) => mapLead(r));
+    cacheRows(rows);
+    set({ loading: false, error: null, offline: false, pending: pending.length, leads: applyPending(rows, pending) });
+  }
 }
 
 export function useLeads() {
@@ -133,13 +258,35 @@ export function useLeads() {
     remoteUser = userId;
     if (!userId) return;
     if (loadedFor !== userId) {
-      set({ leads: [], error: null });
+      set({ leads: [], error: null, pending: 0, offline: false });
       void refreshLeads();
     }
   }, [userId]);
 
-  if (mode === "demo") return { leads: demo.leads, loading: false, error: null, mode };
+  if (mode === "demo") return { leads: demo.leads, loading: false, error: null, pending: 0, offline: false, mode };
   return { ...live, mode };
+}
+
+/**
+ * Outbox status for the app chrome: how many lead changes are waiting for a
+ * connection. Drains anything left from an earlier visit without loading leads.
+ */
+export function useLeadSync() {
+  const { user } = useAuth();
+  const live = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
+  const userId = isRemoteSession(user?.id) ? user!.id : null;
+
+  useEffect(() => {
+    if (!userId) return;
+    if (remoteUser !== userId) {
+      remoteUser = userId;
+      loadedFor = null;
+    }
+    set({ pending: queued().length });
+    void syncOutbox();
+  }, [userId]);
+
+  return userId ? { pending: live.pending, error: live.error } : { pending: 0, error: null };
 }
 
 /** Lead ids are UUIDs once they go to Postgres. */
@@ -162,6 +309,20 @@ function fail(message: string, rollback: Lead[]) {
   return false;
 }
 
+/**
+ * Send now if we can; queue on no connection or a network failure; roll back
+ * and surface anything the server actually rejected.
+ */
+async function write(op: OutboxOp, before: Lead[]) {
+  // Earlier queued writes go first so the server sees them in order.
+  if (snapshot.pending > 0) await syncOutbox();
+  if (!isOnline() || snapshot.pending > 0) return queue(op) || fail("Offline and unable to queue this change.", before);
+  const result = await send(op).catch(() => ({ status: "retry" as const }));
+  if (result.status === "ok") return true;
+  if (result.status === "retry") return queue(op) || fail("Offline and unable to queue this change.", before);
+  return fail(result.reason, before);
+}
+
 export async function createLead(lead: Lead, operatorId?: string | null) {
   if (!remote()) {
     platformStore.addLead(lead);
@@ -169,8 +330,7 @@ export async function createLead(lead: Lead, operatorId?: string | null) {
   }
   const before = snapshot.leads;
   set({ leads: [lead, ...before], error: null });
-  const { error } = await sb().from("leads").insert(leadRow(lead, operatorId ?? defaultOperatorId()));
-  return error ? fail(`Lead not saved: ${error.message}`, before) : true;
+  return write({ kind: "create", lead, operatorId: operatorId ?? defaultOperatorId() }, before);
 }
 
 export async function createLeads(rows: Lead[], operatorId?: string | null) {
@@ -181,8 +341,10 @@ export async function createLeads(rows: Lead[], operatorId?: string | null) {
   const before = snapshot.leads;
   set({ leads: [...rows, ...before], error: null });
   const op = operatorId ?? defaultOperatorId();
-  const { error } = await sb().from("leads").insert(rows.map((l) => leadRow(l, op)));
-  return error ? fail(`Import not saved: ${error.message}`, before) : true;
+  for (const lead of rows) {
+    if (!(await write({ kind: "create", lead, operatorId: op }, before))) return false;
+  }
+  return true;
 }
 
 export async function updateLead(id: string, patch: Partial<Lead>) {
@@ -192,10 +354,7 @@ export async function updateLead(id: string, patch: Partial<Lead>) {
   }
   const before = snapshot.leads;
   set({ leads: before.map((l) => (l.id === id ? { ...l, ...patch } : l)), error: null });
-  // RLS hides rows it denies, so a blocked update is "0 rows", not an error.
-  const { data, error } = await sb().from("leads").update(patchRow(patch)).eq("id", id).select("id");
-  if (error) return fail(`Lead not updated: ${error.message}`, before);
-  return data?.length ? true : fail("Lead not updated: you no longer have access to it.", before);
+  return write({ kind: "update", id, patch }, before);
 }
 
 /** Appends to the timeline server-side so two devices can't overwrite each other. */
@@ -210,7 +369,5 @@ export async function logLeadActivity(id: string, activity: Omit<LeadActivity, "
     leads: before.map((l) => (l.id === id ? { ...l, ...patch, activities: [row, ...(l.activities ?? [])] } : l)),
     error: null,
   });
-  const { data, error } = await sb().rpc("log_lead_activity", { p_lead_id: id, p_activity: row, p_patch: patchRow(patch) });
-  if (error) return fail(`Activity not saved: ${error.message}`, before);
-  return data?.length ? true : fail("Activity not saved: you no longer have access to this lead.", before);
+  return write({ kind: "activity", id, activity: row, patch }, before);
 }

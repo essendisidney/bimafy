@@ -57,6 +57,7 @@ type Dict = {
     save: string;
     saving: string;
     saved: (name: string) => string;
+    savedOffline: (name: string) => string;
   };
   pipeline: { empty: string };
   drawer: {
@@ -197,6 +198,7 @@ const en: Dict = {
     save: "Save lead",
     saving: "Saving…",
     saved: (name) => `${name} added — follow-up booked for tomorrow.`,
+    savedOffline: (name) => `${name} saved on this phone — it will sync when you're back online.`,
   },
   pipeline: { empty: "Empty" },
   drawer: {
@@ -413,6 +415,7 @@ const sw: Dict = {
     save: "Hifadhi",
     saving: "Inahifadhi…",
     saved: (name) => `${name} ameongezwa — ufuatiliaji umepangwa kesho.`,
+    savedOffline: (name) => `${name} amehifadhiwa kwenye simu hii — atatumwa mtandao ukirudi.`,
   },
   pipeline: { empty: "Tupu" },
   drawer: {

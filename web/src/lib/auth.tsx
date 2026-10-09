@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { isNetworkError } from "./outbox";
 import { demoUsers } from "./seed";
 import type { SessionUser, UserRole } from "./types";
 
@@ -15,6 +16,44 @@ async function supabaseClient() {
 }
 
 const KEY = "insurax.session";
+/** Last signed-in profile, so the installed app still knows who you are with no signal. */
+const OFFLINE_KEY = "insurax.session.offline";
+
+type ResolvedSession = { user: SessionUser; operatorId: string | null };
+
+function readOfflineSession(userId?: string): ResolvedSession | null {
+  try {
+    const cached = JSON.parse(localStorage.getItem(OFFLINE_KEY) ?? "null") as ResolvedSession | null;
+    return cached && (!userId || cached.user.id === userId) ? cached : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveOfflineSession(session: ResolvedSession) {
+  try {
+    localStorage.setItem(OFFLINE_KEY, JSON.stringify(session));
+  } catch {
+    // Storage blocked: offline sign-in just won't be available.
+  }
+}
+
+/** Load the profile, falling back to the cached one when the network is down. */
+async function resolveSession(userId: string): Promise<ResolvedSession> {
+  if (typeof navigator !== "undefined" && navigator.onLine === false) {
+    const cached = readOfflineSession(userId);
+    if (cached) return cached;
+  }
+  try {
+    const mapped = await profileToSession(userId);
+    saveOfflineSession(mapped);
+    return mapped;
+  } catch (error) {
+    const cached = isNetworkError(error) ? readOfflineSession(userId) : null;
+    if (cached) return cached;
+    throw error;
+  }
+}
 
 type AuthContextValue = {
   user: SessionUser | null;
@@ -40,7 +79,9 @@ type ProfileRow = {
 
 async function profileToSession(userId: string): Promise<{ user: SessionUser; operatorId: string | null }> {
   const supabase = await supabaseClient();
-  const { data: profile } = await supabase.from("profiles").select("*").eq("id", userId).maybeSingle();
+  const { data: profile, error } = await supabase.from("profiles").select("*").eq("id", userId).maybeSingle();
+  // Fail loudly rather than mapping a signed-in agent to a "participant" with no profile.
+  if (error) throw error;
   const p = profile as ProfileRow | null;
   const { data: participant } = await supabase.from("participants").select("id").eq("profile_id", userId).maybeSingle();
   const { data: agent } = await supabase.from("agents").select("id").eq("profile_id", userId).maybeSingle();
@@ -90,23 +131,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       const supabase = await supabaseClient();
-      const { data } = await supabase.auth.getSession();
-      if (data.session?.user && !cancelled) {
-        const mapped = await profileToSession(data.session.user.id);
-        if (!cancelled) {
-          setUser(mapped.user);
-          setOperatorId(mapped.operatorId ?? process.env.NEXT_PUBLIC_OPERATOR_ID ?? null);
-        }
-      }
-
-      const { data: sub } = supabase.auth.onAuthStateChange(async (_event, session) => {
-        if (!session?.user) {
-          setUser(null);
-          return;
-        }
-        const mapped = await profileToSession(session.user.id);
+      const apply = (mapped: ResolvedSession) => {
+        if (cancelled) return;
         setUser(mapped.user);
         setOperatorId(mapped.operatorId ?? process.env.NEXT_PUBLIC_OPERATOR_ID ?? null);
+      };
+      try {
+        const { data, error } = await supabase.auth.getSession();
+        if (data.session?.user) apply(await resolveSession(data.session.user.id));
+        // An expired token can't refresh with no signal: keep working as the last user.
+        else if (error && isNetworkError(error)) {
+          const cached = readOfflineSession();
+          if (cached) apply(cached);
+        }
+      } catch (error) {
+        const cached = isNetworkError(error) ? readOfflineSession() : null;
+        if (cached) apply(cached);
+      }
+
+      const { data: sub } = supabase.auth.onAuthStateChange(async (event, session) => {
+        if (!session?.user) {
+          // Only a real sign-out ends the session; an empty INITIAL_SESSION while
+          // offline (token couldn't refresh) must not undo the cached user above.
+          if (event === "SIGNED_OUT") {
+            localStorage.removeItem(OFFLINE_KEY);
+            setUser(null);
+          }
+          return;
+        }
+        try {
+          apply(await resolveSession(session.user.id));
+        } catch {
+          // Profile lookup failed for a non-network reason; keep the current state.
+        }
       });
       unsubscribe = () => sub.subscription.unsubscribe();
       if (!cancelled) setReady(true);
@@ -135,7 +192,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
     if (!data.user) throw new Error("No user returned");
-    const mapped = await profileToSession(data.user.id);
+    const mapped = await resolveSession(data.user.id);
     setUser(mapped.user);
     setOperatorId(mapped.operatorId ?? process.env.NEXT_PUBLIC_OPERATOR_ID ?? null);
   }, []);
@@ -146,6 +203,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await supabase.auth.signOut();
     }
     localStorage.removeItem(KEY);
+    localStorage.removeItem(OFFLINE_KEY);
     setUser(null);
   }, [mode]);
 
