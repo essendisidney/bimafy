@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { agents, participants, products } from "@/lib/seed";
 import { useAuth } from "@/lib/auth";
 import {
@@ -105,7 +106,17 @@ function openWhatsApp(phone: string, text: string) {
 }
 
 export default function AgentPage() {
+  // useSearchParams needs a Suspense boundary on a statically rendered page.
+  return (
+    <Suspense>
+      <AgentDesk />
+    </Suspense>
+  );
+}
+
+function AgentDesk() {
   const { user } = useAuth();
+  const params = useSearchParams();
   const { lang, t } = useCopy();
   const { quotes, policies, payments, balanceDeltas } = usePlatform();
   const { leads, loading: leadsLoading, error: leadsError, mode } = useLeads();
@@ -116,7 +127,8 @@ export default function AgentPage() {
   // A signed-in agent always owns leads under their own agents.id, even if they aren't in the demo roster.
   const leadOwner = mode === "supabase" && !viewAgentId && user?.agentId ? user.agentId : distributorKey(agent);
   const [tab, setTab] = useState<Tab>("today");
-  const [openLeadId, setOpenLeadId] = useState<string | null>(null);
+  // ?lead=<id> (e.g. from the ⌘K palette) opens that lead's drawer.
+  const [openLeadId, setOpenLeadId] = useState<string | null>(() => params.get("lead"));
   // null = follow the agent's screen language.
   const [clientLangChoice, setClientLang] = useState<Lang | null>(null);
   const clientLang = clientLangChoice ?? lang;
