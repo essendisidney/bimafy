@@ -96,26 +96,42 @@ const SOURCE_POINTS: Record<LeadSource, number> = {
 };
 
 export type LeadTemperature = "hot" | "warm" | "cold";
-export type LeadScore = { score: number; temperature: LeadTemperature; reasons: string[] };
 
-/** 0–100 propensity-to-bind score with human-readable reasons. */
+/**
+ * Why a lead scored the way it did. Codes, not sentences, so the desk can
+ * render them in the agent's language (see lib/i18n/agency.ts).
+ */
+export type ScoreReason =
+  | { code: "bound" }
+  | { code: "lost"; detail?: string }
+  | { code: "stage"; detail: LeadStatus }
+  | { code: "source"; detail: LeadSource }
+  | { code: "high_value" }
+  | { code: "engaged" }
+  | { code: "idle"; n: number }
+  | { code: "overdue"; n: number }
+  | { code: "no_followup" };
+
+export type LeadScore = { score: number; temperature: LeadTemperature; reasons: ScoreReason[] };
+
+/** 0–100 propensity-to-bind score with the reasons behind it. */
 export function scoreLead(lead: Lead, now: Date = new Date()): LeadScore {
-  if (lead.status === "won") return { score: 100, temperature: "hot", reasons: ["Bound"] };
-  if (lead.status === "lost") return { score: 0, temperature: "cold", reasons: [lead.lostReason || "Lost"] };
+  if (lead.status === "won") return { score: 100, temperature: "hot", reasons: [{ code: "bound" }] };
+  if (lead.status === "lost") return { score: 0, temperature: "cold", reasons: [{ code: "lost", detail: lead.lostReason }] };
 
-  const reasons: string[] = [];
+  const reasons: ScoreReason[] = [];
   let score = { new: 20, contacted: 35, quoted: 55 }[lead.status as "new" | "contacted" | "quoted"];
-  reasons.push(`${lead.status} stage`);
+  reasons.push({ code: "stage", detail: lead.status });
 
   if (lead.source) {
     score += SOURCE_POINTS[lead.source];
-    if (SOURCE_POINTS[lead.source] >= 12) reasons.push(`${lead.source.replace("_", "-")} source`);
+    if (SOURCE_POINTS[lead.source] >= 12) reasons.push({ code: "source", detail: lead.source });
   }
 
   const value = leadValue(lead);
   if (value >= 100_000) {
     score += 10;
-    reasons.push("high-value cover");
+    reasons.push({ code: "high_value" });
   } else if (value >= 30_000) {
     score += 5;
   }
@@ -125,10 +141,10 @@ export function scoreLead(lead: Lead, now: Date = new Date()): LeadScore {
     const idle = Math.floor((now.getTime() - touch) / DAY);
     if (idle <= 3) {
       score += 10;
-      reasons.push("engaged in last 3 days");
+      reasons.push({ code: "engaged" });
     } else if (idle > 21) {
       score -= 15;
-      reasons.push(`${idle} days without contact`);
+      reasons.push({ code: "idle", n: idle });
     }
   }
 
@@ -136,13 +152,13 @@ export function scoreLead(lead: Lead, now: Date = new Date()): LeadScore {
     const due = daysUntil(lead.nextActionAt, now);
     if (due < 0) {
       score -= 10;
-      reasons.push(`follow-up ${-due}d overdue`);
+      reasons.push({ code: "overdue", n: -due });
     } else if (due <= 1) {
       score += 5;
     }
   } else {
     score -= 5;
-    reasons.push("no follow-up booked");
+    reasons.push({ code: "no_followup" });
   }
 
   score = Math.max(1, Math.min(99, Math.round(score)));
@@ -151,22 +167,22 @@ export function scoreLead(lead: Lead, now: Date = new Date()): LeadScore {
 }
 
 export type NextAction = {
-  label: string;
+  code: "first_call" | "price_quote" | "close" | "whatsapp_quote" | "none";
   channel: "call" | "whatsapp" | "quote" | "close" | "none";
   due: "overdue" | "today" | "upcoming" | "unscheduled" | "done";
 };
 
 export function nextBestAction(lead: Lead, now: Date = new Date()): NextAction {
-  if (!isOpen(lead)) return { label: "No action", channel: "none", due: "done" };
+  if (!isOpen(lead)) return { code: "none", channel: "none", due: "done" };
   const dueIn = lead.nextActionAt ? daysUntil(lead.nextActionAt, now) : undefined;
   const due: NextAction["due"] =
     dueIn === undefined ? "unscheduled" : dueIn < 0 ? "overdue" : dueIn === 0 ? "today" : "upcoming";
 
-  if (lead.status === "new") return { label: "Call within 24h — first contact", channel: "call", due };
-  if (lead.status === "contacted") return { label: "Price a quotation", channel: "quote", due };
+  if (lead.status === "new") return { code: "first_call", channel: "call", due };
+  if (lead.status === "contacted") return { code: "price_quote", channel: "quote", due };
   const quotedTouches = (lead.activities ?? []).filter((a) => a.kind !== "status").length;
-  if (quotedTouches >= 3) return { label: "Ask for the close — send M-Pesa STK", channel: "close", due };
-  return { label: "WhatsApp the quote & handle objections", channel: "whatsapp", due };
+  if (quotedTouches >= 3) return { code: "close", channel: "close", due };
+  return { code: "whatsapp_quote", channel: "whatsapp", due };
 }
 
 export type Agenda = { overdue: Lead[]; today: Lead[]; upcoming: Lead[]; unscheduled: Lead[] };
@@ -212,6 +228,13 @@ export function pipelineSummary(leads: Lead[]): PipelineSummary {
 }
 
 export type RenewalBucket = "win_back" | "0-30" | "31-60" | "61-90";
+export type RenewalDriver =
+  | { code: "failed_collections"; n: number }
+  | { code: "policy_status"; detail: Policy["status"] }
+  | { code: "instalment_payer"; detail: Policy["frequency"] }
+  | { code: "expired"; n: number }
+  | { code: "expires_soon" }
+  | { code: "no_settled_payment" };
 export type RenewalItem = {
   policy: Policy;
   daysToExpiry: number;
@@ -219,7 +242,7 @@ export type RenewalItem = {
   /** 0–1 likelihood the client does not renew. */
   lapseRisk: number;
   riskLabel: "high" | "medium" | "low";
-  drivers: string[];
+  drivers: RenewalDriver[];
 };
 
 const LAPSE_STATUSES = new Set(["lapsed", "suspended", "cancelled"]);
@@ -241,32 +264,32 @@ export function renewalQueue(
     const d = daysUntil(policy.expiry, now);
     if (d > horizonDays || d < -graceDays) continue;
 
-    const drivers: string[] = [];
+    const drivers: RenewalDriver[] = [];
     let risk = 0.15;
     const mine = payments.filter((p) => p.policyNumber === policy.number);
     const failed = mine.filter((p) => p.status === "failed").length;
     if (failed) {
       risk += 0.25 * Math.min(failed, 2);
-      drivers.push(`${failed} failed collection${failed > 1 ? "s" : ""}`);
+      drivers.push({ code: "failed_collections", n: failed });
     }
     if (LAPSE_STATUSES.has(policy.status)) {
       risk += 0.3;
-      drivers.push(`policy ${policy.status}`);
+      drivers.push({ code: "policy_status", detail: policy.status });
     }
     if (policy.frequency === "monthly" || policy.frequency === "weekly" || policy.frequency === "daily") {
       risk += 0.1;
-      drivers.push(`${policy.frequency} payer`);
+      drivers.push({ code: "instalment_payer", detail: policy.frequency });
     }
     if (d < 0) {
       risk += 0.2;
-      drivers.push(`expired ${-d}d ago`);
+      drivers.push({ code: "expired", n: -d });
     } else if (d <= 14) {
       risk += 0.1;
-      drivers.push("expires within 2 weeks");
+      drivers.push({ code: "expires_soon" });
     }
     if (!mine.some((p) => p.status === "completed" || p.status === "reconciled")) {
       risk += 0.1;
-      drivers.push("no settled payment on file");
+      drivers.push({ code: "no_settled_payment" });
     }
     const lapseRisk = Math.min(0.95, Math.round(risk * 100) / 100);
     const bucket: RenewalBucket = d < 0 ? "win_back" : d <= 30 ? "0-30" : d <= 60 ? "31-60" : "61-90";
@@ -385,7 +408,15 @@ export function targetForecast(ytdGwp: number, target: number, now: Date = new D
   };
 }
 
-export type CrossSellSuggestion = { line: ProductLine; reason: string; value: number };
+export type CrossSellReason =
+  | "drives_without_medical"
+  | "boda_funeral"
+  | "farmer_livestock"
+  | "income_protection"
+  | "complete_family_plan"
+  | "vehicle_owner_assets"
+  | "digital_travel";
+export type CrossSellSuggestion = { line: ProductLine; reason: CrossSellReason; value: number; age?: number };
 export type CrossSellRow = {
   participant: Participant;
   owned: ProductLine[];
@@ -410,19 +441,19 @@ export function crossSell(
     const owned = [...new Set(held.map((p) => lineOf(p.productId)).filter((l): l is ProductLine => Boolean(l)))];
     const has = (l: ProductLine) => owned.includes(l);
     const out: CrossSellSuggestion[] = [];
-    const add = (line: ProductLine, reason: string) => {
-      if (!has(line) && !out.some((s) => s.line === line)) out.push({ line, reason, value: DEFAULT_LEAD_VALUE[line] });
+    const add = (line: ProductLine, reason: CrossSellReason, extra: { age?: number } = {}) => {
+      if (!has(line) && !out.some((s) => s.line === line)) out.push({ line, reason, value: DEFAULT_LEAD_VALUE[line], ...extra });
     };
     const age = participant.dob ? ageOn(participant.dob, now) : undefined;
 
-    if ((has("motor") || has("micro")) && !has("medical")) add("medical", "Drives daily without hospital cash cover");
-    if (has("micro")) add("funeral", "Boda riders: low-cost Janaaza cover for the family");
-    if (has("agriculture")) add("livestock", "Farmer with crop cover — protect the herd too");
+    if ((has("motor") || has("micro")) && !has("medical")) add("medical", "drives_without_medical");
+    if (has("micro")) add("funeral", "boda_funeral");
+    if (has("agriculture")) add("livestock", "farmer_livestock");
     if (has("medical") && !has("family_takaful") && age !== undefined && age >= 25 && age <= 55)
-      add("family_takaful", `Age ${age}: income protection for dependants`);
-    if (has("family_takaful")) add("funeral", "Complete the family plan with funeral cover");
-    if (has("motor")) add("asset", "Vehicle owner — home & business assets likely uninsured");
-    if (has("gadget") && !has("travel")) add("travel", "Digital-first client — travel cover via app");
+      add("family_takaful", "income_protection", { age });
+    if (has("family_takaful")) add("funeral", "complete_family_plan");
+    if (has("motor")) add("asset", "vehicle_owner_assets");
+    if (has("gadget") && !has("travel")) add("travel", "digital_travel");
 
     if (out.length) rows.push({ participant, owned, suggestions: out.slice(0, 3) });
   }

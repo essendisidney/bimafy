@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { EnterAs } from "@/components/instant-quote";
-import { LandingHero, LangToggle } from "@/components/landing-hero";
+import { LandingHero } from "@/components/landing-hero";
+import { LangToggle } from "@/components/lang-toggle";
 import { modules } from "@/lib/modules";
 
 const MOAT = [

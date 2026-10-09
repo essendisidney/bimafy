@@ -94,7 +94,7 @@ export function Stat({
   );
 }
 
-export function Badge({ status }: { status: string }) {
+export function Badge({ status, label }: { status: string; label?: string }) {
   const tone = statusTone(status);
   const tones = {
     ok: "bg-teal/10 text-teal border-teal/20",
@@ -105,11 +105,12 @@ export function Badge({ status }: { status: string }) {
   return (
     <span
       className={cn(
-        "inline-flex rounded-lg border px-2.5 py-0.5 text-xs capitalize",
+        "inline-flex rounded-lg border px-2.5 py-0.5 text-xs",
+        !label && "capitalize",
         tones[tone as keyof typeof tones],
       )}
     >
-      {prettyStatus(status)}
+      {label ?? prettyStatus(status)}
     </span>
   );
 }
