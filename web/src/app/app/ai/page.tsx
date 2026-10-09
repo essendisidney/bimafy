@@ -99,7 +99,7 @@ export default function AiPage() {
         <p className="mt-2 text-mute">
           Quote referrals use the underwriting rules engine. Claims use fraud signals (early claim, duplicates, frequency, amount).
           Renewals and failed collections come from the PAS book. OCR / IPRS / NTSA sandboxes stay on{" "}
-          <Link href="/app/integrations" className="text-teal underline-offset-2 hover:underline">
+          <Link href="/app/integrations" className="text-teal underline decoration-teal/40 underline-offset-2 hover:decoration-teal">
             InsuraX Connect
           </Link>
           .

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useEffect, useMemo, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
 import { priceQuote, quoteStatusFromUw } from "@/lib/engines/quote";
 import { pushNotification } from "@/lib/events/ledger";
 import { useAuth } from "@/lib/auth";
@@ -25,17 +25,25 @@ function NewQuoteForm() {
   const preset = params.get("product");
   const leadId = params.get("lead");
   const lead = leadId ? leads.find((l) => l.id === leadId) : undefined;
+  // Explicit picks; empty means "use the default worked out below".
   const [productId, setProductId] = useState("");
-  const [participantId, setParticipantId] = useState(user?.participantId ?? "");
+  const [participantId, setParticipantId] = useState("");
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
-  const [creditScore, setCreditScore] = useState<number | undefined>(undefined);
-  const [crbBand, setCrbBand] = useState<string | null>(null);
+  // A CRB result belongs to the client it was run for, so switching clients hides it.
+  const [crb, setCrb] = useState<{ participantId: string; score?: number; band?: string; error?: string } | null>(null);
   const [crbBusy, setCrbBusy] = useState(false);
-  const [crbError, setCrbError] = useState<string | null>(null);
-  const [leadPrefillDone, setLeadPrefillDone] = useState(false);
 
-  const resolvedProductId = productId || products.find((p) => p.slug === preset)?.id || products[0]?.id || "";
+  // Defaults: a lead's phone/line wins, then the URL preset / signed-in participant, then the first option.
+  const leadParticipantId = lead ? participants.find((p) => digits(p.phone) === digits(lead.phone))?.id : undefined;
+  const leadProductId = lead ? products.find((p) => p.line === lead.productLine)?.id : undefined;
+  const resolvedProductId =
+    productId || leadProductId || products.find((p) => p.slug === preset)?.id || products[0]?.id || "";
+  const resolvedParticipantId = participantId || leadParticipantId || user?.participantId || participants[0]?.id || "";
+  const crbHere = crb?.participantId === resolvedParticipantId ? crb : null;
+  const creditScore = crbHere?.score;
+  const crbBand = crbHere?.band ?? null;
+  const crbError = crbHere?.error ?? null;
   const [sumCovered, setSumCovered] = useState(500000);
   const [frequency, setFrequency] = useState<Frequency>("monthly");
   const [age, setAge] = useState(32);
@@ -44,38 +52,14 @@ function NewQuoteForm() {
   const [claimsLast3Years, setClaimsLast3Years] = useState(0);
 
   const product = products.find((p) => p.id === resolvedProductId) ?? products[0];
-  const participant = participants.find((p) => p.id === participantId) ?? participants[0];
+  const participant = participants.find((p) => p.id === resolvedParticipantId) ?? participants[0];
   const quoteName = lead?.name ?? participant?.name ?? "Participant";
-
-  useEffect(() => {
-    if (participantId) return;
-    if (user?.participantId) {
-      setParticipantId(user.participantId);
-      return;
-    }
-    if (participants[0]?.id) setParticipantId(participants[0].id);
-  }, [participantId, participants, user?.participantId]);
-
-  useEffect(() => {
-    setCreditScore(undefined);
-    setCrbBand(null);
-    setCrbError(null);
-  }, [participantId]);
-
-  useEffect(() => {
-    if (!lead || leadPrefillDone || !products.length) return;
-    const byPhone = participants.find((p) => digits(p.phone) === digits(lead.phone));
-    if (byPhone) setParticipantId(byPhone.id);
-    const byLine = products.find((p) => p.line === lead.productLine);
-    if (byLine) setProductId(byLine.id);
-    setLeadPrefillDone(true);
-  }, [lead, leadPrefillDone, products]);
 
   const priced = useMemo(() => {
     if (!product || !participant) return null;
     return priceQuote({
       product,
-      participantId,
+      participantId: resolvedParticipantId,
       participantName: quoteName,
       sumCovered,
       frequency,
@@ -93,7 +77,7 @@ function NewQuoteForm() {
     });
   }, [
     product,
-    participantId,
+    resolvedParticipantId,
     participant,
     quoteName,
     sumCovered,
@@ -109,8 +93,9 @@ function NewQuoteForm() {
 
   async function runCrb() {
     if (!participant) return;
+    const forParticipant = participant.id;
     setCrbBusy(true);
-    setCrbError(null);
+    setCrb(null);
     try {
       const res = await fetch("/api/partners/crb/check", {
         method: "POST",
@@ -123,10 +108,13 @@ function NewQuoteForm() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "CRB failed");
-      setCreditScore(data.score as number);
-      setCrbBand(`${data.band} · UW ${data.uwHint}${data.loadPercent ? ` (+${data.loadPercent}%)` : ""}`);
+      setCrb({
+        participantId: forParticipant,
+        score: data.score as number,
+        band: `${data.band} · UW ${data.uwHint}${data.loadPercent ? ` (+${data.loadPercent}%)` : ""}`,
+      });
     } catch (e) {
-      setCrbError(e instanceof Error ? e.message : "CRB failed");
+      setCrb({ participantId: forParticipant, error: e instanceof Error ? e.message : "CRB failed" });
     } finally {
       setCrbBusy(false);
     }
@@ -162,7 +150,7 @@ function NewQuoteForm() {
             </select>
           </Field>
           <Field label="Participant">
-            <select className={inputClass} value={participantId} onChange={(e) => setParticipantId(e.target.value)}>
+            <select className={inputClass} value={resolvedParticipantId} onChange={(e) => setParticipantId(e.target.value)}>
               {participants.map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.name} · {p.county}

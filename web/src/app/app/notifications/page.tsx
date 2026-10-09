@@ -81,7 +81,7 @@ export default function NotificationsPage() {
       </Card>
       <p className="mt-3 text-xs text-mute">
         Tip: claim / payment / endorsement events include deep links — use{" "}
-        <Link className="text-teal" href="/app/claims">
+        <Link className="text-teal underline decoration-teal/40 underline-offset-2 hover:decoration-teal" href="/app/claims">
           Claims
         </Link>{" "}
         or Open above.

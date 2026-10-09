@@ -35,11 +35,8 @@ export function useProducts() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (mode !== "supabase") {
-      setProducts(seedProducts);
-      setLoading(false);
-      return;
-    }
+    // Demo mode: state already holds the seed and `loading` started false.
+    if (mode !== "supabase") return;
     let cancelled = false;
     (async () => {
       try {
@@ -69,11 +66,8 @@ export function useParticipants() {
   const [loading, setLoading] = useState(mode === "supabase");
 
   useEffect(() => {
-    if (mode !== "supabase") {
-      setParticipants(seedParticipants);
-      setLoading(false);
-      return;
-    }
+    // Demo mode: state already holds the seed and `loading` started false.
+    if (mode !== "supabase") return;
     let cancelled = false;
     (async () => {
       try {
@@ -100,18 +94,14 @@ export function useParticipants() {
 export function useQuotesBook() {
   const mode = useBackendMode();
   const demo = usePlatform();
-  const [quotes, setQuotes] = useState<Quote[]>([]);
+  const [remoteQuotes, setQuotes] = useState<Quote[]>([]);
   const [loading, setLoading] = useState(mode === "supabase");
   const [error, setError] = useState<string | null>(null);
   const [tick, setTick] = useState(0);
   const refresh = useCallback(() => setTick((t) => t + 1), []);
 
   useEffect(() => {
-    if (mode !== "supabase") {
-      setQuotes(demo.quotes);
-      setLoading(false);
-      return;
-    }
+    if (mode !== "supabase") return;
     let cancelled = false;
     (async () => {
       setLoading(true);
@@ -142,24 +132,21 @@ export function useQuotesBook() {
     };
   }, [mode, demo.quotes, tick]);
 
-  return { quotes, loading, error, mode, refresh };
+  const live = mode === "supabase";
+  return { quotes: live ? remoteQuotes : demo.quotes, loading: live && loading, error, mode, refresh };
 }
 
 export function usePoliciesBook() {
   const mode = useBackendMode();
   const demo = usePlatform();
-  const [policies, setPolicies] = useState<Policy[]>([]);
+  const [remotePolicies, setPolicies] = useState<Policy[]>([]);
   const [loading, setLoading] = useState(mode === "supabase");
   const [error, setError] = useState<string | null>(null);
   const [tick, setTick] = useState(0);
   const refresh = useCallback(() => setTick((t) => t + 1), []);
 
   useEffect(() => {
-    if (mode !== "supabase") {
-      setPolicies(demo.policies);
-      setLoading(false);
-      return;
-    }
+    if (mode !== "supabase") return;
     let cancelled = false;
     (async () => {
       setLoading(true);
@@ -192,24 +179,21 @@ export function usePoliciesBook() {
     };
   }, [mode, demo.policies, tick]);
 
-  return { policies, loading, error, mode, refresh };
+  const live = mode === "supabase";
+  return { policies: live ? remotePolicies : demo.policies, loading: live && loading, error, mode, refresh };
 }
 
 export function useClaimsBook() {
   const mode = useBackendMode();
   const demo = usePlatform();
-  const [claims, setClaims] = useState<Claim[]>([]);
+  const [remoteClaims, setClaims] = useState<Claim[]>([]);
   const [loading, setLoading] = useState(mode === "supabase");
   const [error, setError] = useState<string | null>(null);
   const [tick, setTick] = useState(0);
   const refresh = useCallback(() => setTick((t) => t + 1), []);
 
   useEffect(() => {
-    if (mode !== "supabase") {
-      setClaims(demo.claims);
-      setLoading(false);
-      return;
-    }
+    if (mode !== "supabase") return;
     let cancelled = false;
     (async () => {
       setLoading(true);
@@ -240,23 +224,20 @@ export function useClaimsBook() {
     };
   }, [mode, demo.claims, tick]);
 
-  return { claims, loading, error, mode, refresh };
+  const live = mode === "supabase";
+  return { claims: live ? remoteClaims : demo.claims, loading: live && loading, error, mode, refresh };
 }
 
 export function usePaymentsBook() {
   const mode = useBackendMode();
   const demo = usePlatform();
-  const [payments, setPayments] = useState<Payment[]>([]);
+  const [remotePayments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(mode === "supabase");
   const [tick, setTick] = useState(0);
   const refresh = useCallback(() => setTick((t) => t + 1), []);
 
   useEffect(() => {
-    if (mode !== "supabase") {
-      setPayments(demo.payments);
-      setLoading(false);
-      return;
-    }
+    if (mode !== "supabase") return;
     let cancelled = false;
     (async () => {
       setLoading(true);
@@ -287,23 +268,20 @@ export function usePaymentsBook() {
     };
   }, [mode, demo.payments, tick]);
 
-  return { payments, loading, mode, refresh };
+  const live = mode === "supabase";
+  return { payments: live ? remotePayments : demo.payments, loading: live && loading, mode, refresh };
 }
 
 export function useJournalsBook() {
   const mode = useBackendMode();
   const demo = usePlatform();
-  const [journals, setJournals] = useState<JournalEntry[]>([]);
+  const [remoteJournals, setJournals] = useState<JournalEntry[]>([]);
   const [loading, setLoading] = useState(mode === "supabase");
   const [tick, setTick] = useState(0);
   const refresh = useCallback(() => setTick((t) => t + 1), []);
 
   useEffect(() => {
-    if (mode !== "supabase") {
-      setJournals(demo.journals);
-      setLoading(false);
-      return;
-    }
+    if (mode !== "supabase") return;
     let cancelled = false;
     (async () => {
       setLoading(true);
@@ -326,7 +304,8 @@ export function useJournalsBook() {
     };
   }, [mode, demo.journals, tick]);
 
-  return { journals, loading, mode, refresh };
+  const live = mode === "supabase";
+  return { journals: live ? remoteJournals : demo.journals, loading: live && loading, mode, refresh };
 }
 
 export async function persistQuote(quote: Quote, operatorId: string) {

@@ -1,10 +1,18 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { demoUsers } from "./seed";
 import type { SessionUser, UserRole } from "./types";
+
+/**
+ * The Supabase client is loaded on demand, so pages that never need it
+ * (the landing page in demo mode) don't ship or parse it up front.
+ */
+async function supabaseClient() {
+  const { createClient } = await import("@/lib/supabase/client");
+  return createClient();
+}
 
 const KEY = "insurax.session";
 
@@ -31,7 +39,7 @@ type ProfileRow = {
 };
 
 async function profileToSession(userId: string): Promise<{ user: SessionUser; operatorId: string | null }> {
-  const supabase = createClient();
+  const supabase = await supabaseClient();
   const { data: profile } = await supabase.from("profiles").select("*").eq("id", userId).maybeSingle();
   const p = profile as ProfileRow | null;
   const { data: participant } = await supabase.from("participants").select("id").eq("profile_id", userId).maybeSingle();
@@ -81,7 +89,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return;
       }
 
-      const supabase = createClient();
+      const supabase = await supabaseClient();
       const { data } = await supabase.auth.getSession();
       if (data.session?.user && !cancelled) {
         const mapped = await profileToSession(data.session.user.id);
@@ -123,7 +131,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const loginWithPassword = useCallback(async (email: string, password: string) => {
-    const supabase = createClient();
+    const supabase = await supabaseClient();
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) throw error;
     if (!data.user) throw new Error("No user returned");
@@ -134,7 +142,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = useCallback(async () => {
     if (mode === "supabase") {
-      const supabase = createClient();
+      const supabase = await supabaseClient();
       await supabase.auth.signOut();
     }
     localStorage.removeItem(KEY);

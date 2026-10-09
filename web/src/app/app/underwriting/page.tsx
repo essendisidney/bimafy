@@ -4,7 +4,7 @@ import Link from "next/link";
 import { updatePolicyRemote, updateQuoteRemote, usePoliciesBook, useQuotesBook } from "@/lib/data";
 import { acceptPendingEndorsement, pushNotification } from "@/lib/events/ledger";
 import { money } from "@/lib/format";
-import { Badge, Button, Card, PageHeader, Table } from "@/components/ui";
+import { Button, Card, PageHeader, Table } from "@/components/ui";
 
 export default function UnderwritingPage() {
   const { quotes, refresh } = useQuotesBook();

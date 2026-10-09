@@ -98,7 +98,7 @@ export function Stat({
 export function Badge({ status, label }: { status: string; label?: string }) {
   const tone = statusTone(status);
   const tones = {
-    ok: "bg-teal/10 text-teal border-teal/20",
+    ok: "bg-teal/10 text-teal-ink border-teal/20",
     warn: "bg-gold/15 text-gold-ink border-gold/30",
     danger: "bg-danger/10 text-danger border-danger/25",
     muted: "bg-sand text-mute border-line",

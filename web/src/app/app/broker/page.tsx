@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { brokers, participants } from "@/lib/seed";
 import { useAuth } from "@/lib/auth";
@@ -36,8 +36,9 @@ export default function BrokerPage() {
   const myQuotes = quotes.filter((q) => q.brokerId === broker.id || q.channel === "broker");
   const bookGwp = myPolicies.reduce((s, p) => s + p.contribution, 0) + delta.gwp;
   const accruedCommission = Math.round(bookGwp * broker.commissionRate);
+  const [now] = useState(() => Date.now());
   const renewals = myPolicies.filter((p) => {
-    const days = (new Date(p.expiry).getTime() - Date.now()) / 86400000;
+    const days = (new Date(p.expiry).getTime() - now) / 86400000;
     return days >= 0 && days <= 60;
   });
 
@@ -46,11 +47,7 @@ export default function BrokerPage() {
   );
   const [importMsg, setImportMsg] = useState("");
 
-  const clientIds = useMemo(() => {
-    const ids = new Set(myPolicies.map((p) => p.participantId));
-    myQuotes.forEach((q) => ids.add(q.participantId));
-    return ids;
-  }, [myPolicies, myQuotes]);
+  const clientIds = new Set([...myPolicies.map((p) => p.participantId), ...myQuotes.map((q) => q.participantId)]);
 
   const clients = participants.filter((p) => clientIds.has(p.id));
 

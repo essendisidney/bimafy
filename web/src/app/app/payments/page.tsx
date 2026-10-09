@@ -56,29 +56,28 @@ export default function PaymentsPage() {
     }
     return payments;
   }, [payments, book, user]);
-  const [policyId, setPolicyId] = useState("");
+  const [pickedPolicyId, setPickedPolicyId] = useState("");
   const [method, setMethod] = useState<PaymentMethod>("mpesa_stk");
-  const [amount, setAmount] = useState(200);
-  const [phone, setPhone] = useState("+254711000111");
+  // Edits the user typed; null means "use the selected policy's own values".
+  const [amountEdit, setAmount] = useState<number | null>(null);
+  const [phoneEdit, setPhone] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState<StkPending | null>(null);
 
-  useEffect(() => {
-    if (!policyId && book[0]?.id) setPolicyId(book[0].id);
-    if (policyId && book.length && !book.some((p) => p.id === policyId)) {
-      setPolicyId(book[0]?.id ?? "");
-    }
-  }, [book, policyId]);
+  // Fall back to the first policy when nothing (or a policy no longer in the book) is picked.
+  const policyId = book.some((p) => p.id === pickedPolicyId) ? pickedPolicyId : (book[0]?.id ?? "");
+  const selectedPolicy = book.find((p) => p.id === policyId);
+  const amount = amountEdit ?? selectedPolicy?.contribution ?? 200;
+  const phone =
+    phoneEdit ?? participants.find((p) => p.id === selectedPolicy?.participantId)?.phone ?? "+254711000111";
 
-  useEffect(() => {
-    const policy = book.find((p) => p.id === policyId);
-    if (!policy) return;
-    setAmount(policy.contribution);
-    const participant = participants.find((p) => p.id === policy.participantId);
-    if (participant?.phone) setPhone(participant.phone);
-  }, [policyId, book]);
+  function choosePolicy(id: string) {
+    setPickedPolicyId(id);
+    setAmount(null);
+    setPhone(null);
+  }
 
   useEffect(() => {
     if (!pending || pending.status !== "pending") return;
@@ -136,7 +135,7 @@ export default function PaymentsPage() {
       }
     }, 2000);
     return () => clearInterval(timer);
-  }, [pending, book]);
+  }, [pending, book, refreshPayments, refreshPolicies]);
 
   return (
     <div>
@@ -149,7 +148,7 @@ export default function PaymentsPage() {
         <Card className="space-y-3 p-5">
           <h2 className="font-display text-xl">Collect contribution</h2>
           <Field label="Policy">
-            <select className={inputClass} value={policyId} onChange={(e) => setPolicyId(e.target.value)}>
+            <select className={inputClass} value={policyId} onChange={(e) => choosePolicy(e.target.value)}>
               {book.map((p) => (
                 <option key={p.id} value={p.id}>
                   {p.number}

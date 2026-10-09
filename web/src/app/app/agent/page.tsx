@@ -656,7 +656,7 @@ function LeadDrawer({
           <button
             onClick={sendWhatsApp}
             disabled={!lead.phone || !message.trim()}
-            className="mt-2 flex w-full items-center justify-center rounded-xl bg-[#1f8a4c] px-4 py-2.5 text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-50"
+            className="mt-2 flex w-full items-center justify-center rounded-xl bg-[#1c8247] px-4 py-2.5 text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-50"
           >
             {t.drawer.waSend}
           </button>
@@ -749,7 +749,7 @@ function RiskBadge({ level }: { level: RenewalItem["riskLabel"] }) {
   const tone = {
     high: "bg-danger/10 text-danger border-danger/25",
     medium: "bg-gold/15 text-gold-ink border-gold/30",
-    low: "bg-teal/10 text-teal border-teal/20",
+    low: "bg-teal/10 text-teal-ink border-teal/20",
   }[level];
   return <span className={cn("whitespace-nowrap rounded-lg border px-2 py-0.5 text-xs", tone)}>{t.renewals.risk[level]}</span>;
 }

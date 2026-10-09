@@ -111,7 +111,7 @@ export default function ClaimDetailPage() {
             <Badge status={claim.status} />
             <span
               className={`rounded-full px-2.5 py-0.5 text-xs ${
-                claim.fraudScore >= 60 ? "bg-danger/10 text-danger" : "bg-teal/10 text-teal"
+                claim.fraudScore >= 60 ? "bg-danger/10 text-danger" : "bg-teal/10 text-teal-ink"
               }`}
             >
               Fraud score {claim.fraudScore}
