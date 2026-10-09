@@ -43,7 +43,7 @@ export const demoUsers: SessionUser[] = [
   {
     id: "u-agent",
     name: "Joseph Otieno",
-    email: "joseph.agent@insurax.africa",
+    email: "joseph.agent@bimafy.app",
     phone: "+254722111222",
     role: "agent",
     branch: "Kisumu",
@@ -61,7 +61,7 @@ export const demoUsers: SessionUser[] = [
   {
     id: "u-uw",
     name: "Fatma Hassan",
-    email: "fatma.uw@insurax.africa",
+    email: "fatma.uw@bimafy.app",
     phone: "+254700111222",
     role: "underwriter",
     branch: "Nairobi CBD",
@@ -69,7 +69,7 @@ export const demoUsers: SessionUser[] = [
   {
     id: "u-claims",
     name: "Daniel Kariuki",
-    email: "daniel.claims@insurax.africa",
+    email: "daniel.claims@bimafy.app",
     phone: "+254700333444",
     role: "claims_officer",
     branch: "Nairobi CBD",
@@ -77,7 +77,7 @@ export const demoUsers: SessionUser[] = [
   {
     id: "u-assessor",
     name: "James Omondi",
-    email: "james.assessor@insurax.africa",
+    email: "james.assessor@bimafy.app",
     phone: "+254700444555",
     role: "claims_assessor",
     branch: "Nairobi CBD",
@@ -85,7 +85,7 @@ export const demoUsers: SessionUser[] = [
   {
     id: "u-fin",
     name: "Grace Njeri",
-    email: "grace.finance@insurax.africa",
+    email: "grace.finance@bimafy.app",
     phone: "+254700555666",
     role: "finance",
     branch: "Nairobi CBD",
@@ -93,7 +93,7 @@ export const demoUsers: SessionUser[] = [
   {
     id: "u-comp",
     name: "Ibrahim Ali",
-    email: "ibrahim.compliance@insurax.africa",
+    email: "ibrahim.compliance@bimafy.app",
     phone: "+254700777888",
     role: "compliance",
     branch: "Nairobi CBD",
@@ -101,7 +101,7 @@ export const demoUsers: SessionUser[] = [
   {
     id: "u-shariah",
     name: "Sheikh Yusuf Noor",
-    email: "shariah@insurax.africa",
+    email: "shariah@bimafy.app",
     phone: "+254700999000",
     role: "shariah_officer",
     branch: "Mombasa",
@@ -109,7 +109,7 @@ export const demoUsers: SessionUser[] = [
   {
     id: "u-admin",
     name: "Platform Admin",
-    email: "admin@insurax.africa",
+    email: "admin@bimafy.app",
     phone: "+254700000001",
     role: "admin",
     branch: "Nairobi CBD",
@@ -117,7 +117,7 @@ export const demoUsers: SessionUser[] = [
   {
     id: "u-cc",
     name: "Mercy Achieng",
-    email: "mercy.cc@insurax.africa",
+    email: "mercy.cc@bimafy.app",
     phone: "+254701010101",
     role: "call_center",
     branch: "Nairobi CBD",
@@ -125,7 +125,7 @@ export const demoUsers: SessionUser[] = [
   {
     id: "u-bm",
     name: "Peter Kamau",
-    email: "peter.nakuru@insurax.africa",
+    email: "peter.nakuru@bimafy.app",
     phone: "+254702020202",
     role: "branch_manager",
     branch: "Nakuru",

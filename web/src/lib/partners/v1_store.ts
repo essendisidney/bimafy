@@ -9,17 +9,17 @@ type V1Book = {
   claims: Claim[];
 };
 
-const globalStore = globalThis as unknown as { __insuraxV1?: V1Book };
+const globalStore = globalThis as unknown as { __bimafyV1?: V1Book };
 
 function book(): V1Book {
-  if (!globalStore.__insuraxV1) {
-    globalStore.__insuraxV1 = {
+  if (!globalStore.__bimafyV1) {
+    globalStore.__bimafyV1 = {
       quotes: [],
       policies: [...seedPolicies],
       claims: [...seedClaims],
     };
   }
-  return globalStore.__insuraxV1;
+  return globalStore.__bimafyV1;
 }
 
 export function v1ListProducts() {

@@ -1,7 +1,7 @@
 import { platformStore } from "./store";
 import type { WebhookDelivery } from "./types";
 
-export const DEFAULT_WEBHOOK_URL = "https://partner.example/webhooks/insurax";
+export const DEFAULT_WEBHOOK_URL = "https://partner.example/webhooks/bimafy";
 
 export function enqueueWebhook(event: string, payload: Record<string, unknown>, url = DEFAULT_WEBHOOK_URL) {
   const row: WebhookDelivery = {

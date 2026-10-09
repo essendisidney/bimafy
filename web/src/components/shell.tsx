@@ -14,7 +14,7 @@ import { ThemeToggle } from "./theme-toggle";
 import { NAV_ICONS } from "./nav-icons";
 import { cn } from "./ui";
 
-const COLLAPSED_KEY = "insurax.sidebar.collapsed";
+const COLLAPSED_KEY = "bimafy.sidebar.collapsed";
 
 const noopSubscribe = () => () => {};
 /** "⌘K" on Apple devices, "Ctrl K" elsewhere (server render assumes Apple). */

@@ -15,9 +15,9 @@ async function supabaseClient() {
   return createClient();
 }
 
-const KEY = "insurax.session";
+const KEY = "bimafy.session";
 /** Last signed-in profile, so the installed app still knows who you are with no signal. */
-const OFFLINE_KEY = "insurax.session.offline";
+const OFFLINE_KEY = "bimafy.session.offline";
 
 type ResolvedSession = { user: SessionUser; operatorId: string | null };
 

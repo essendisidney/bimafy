@@ -7,9 +7,9 @@ export type PartnerAuth = {
 };
 
 const DEFAULT_PARTNERS: PartnerAuth[] = [
-  { partnerId: "ptn-demo", name: "Bimafy Demo Embed", key: "insurax_pk_demo" },
-  { partnerId: "ptn-sacco", name: "Demo SACCO Gateway", key: "insurax_pk_sacco" },
-  { partnerId: "ptn-ride", name: "Demo Ride-hailing", key: "insurax_pk_ride" },
+  { partnerId: "ptn-demo", name: "Bimafy Demo Embed", key: "bimafy_pk_demo" },
+  { partnerId: "ptn-sacco", name: "Demo SACCO Gateway", key: "bimafy_pk_sacco" },
+  { partnerId: "ptn-ride", name: "Demo Ride-hailing", key: "bimafy_pk_ride" },
 ];
 
 export function listPartnerKeys(): PartnerAuth[] {
@@ -35,7 +35,7 @@ export function authenticatePartner(req: Request): PartnerAuth | null {
 
 export function unauthorized() {
   return NextResponse.json(
-    { error: "Unauthorized", hint: "Pass Authorization: Bearer insurax_pk_demo or X-API-Key" },
+    { error: "Unauthorized", hint: "Pass Authorization: Bearer bimafy_pk_demo or X-API-Key" },
     { status: 401 },
   );
 }

@@ -183,7 +183,7 @@ export default function CompliancePage() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `insurax-ira-compliance-${new Date().toISOString().slice(0, 10)}.json`;
+    a.download = `bimafy-ira-compliance-${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
     URL.revokeObjectURL(url);
     platformStore.addAuditLog({
