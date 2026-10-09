@@ -92,7 +92,7 @@ function CrbPanel() {
 
   return (
     <Card className="overflow-hidden">
-      <div className="border-b border-line bg-[#1a2f4a] px-5 py-4 text-champagne">
+      <div className="border-b border-line bg-navy px-5 py-4 text-champagne">
         <p className="text-[11px] uppercase tracking-[0.2em] text-gold">Credit</p>
         <p className="mt-1 font-display text-2xl text-white">CRB check</p>
       </div>
@@ -354,7 +354,7 @@ function NtsaPanel() {
 
   return (
     <Card className="overflow-hidden">
-      <div className="border-b border-line bg-[#0a3d3a] px-5 py-4 text-champagne">
+      <div className="border-b border-line bg-forest px-5 py-4 text-champagne">
         <p className="text-[11px] uppercase tracking-[0.2em] text-gold">Motor</p>
         <p className="mt-1 font-display text-2xl text-white">NTSA lookup</p>
       </div>

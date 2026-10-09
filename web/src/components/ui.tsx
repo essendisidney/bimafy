@@ -25,13 +25,13 @@ export function Button({
   disabled?: boolean;
 }) {
   const styles = {
-    primary: "bg-teal text-on-accent hover:bg-mint",
+    primary: "bg-teal text-on-accent hover:brightness-110",
     secondary: "bg-surface text-ink border border-line hover:border-teal hover:text-teal",
     ghost: "bg-transparent text-ink hover:bg-sand",
     danger: "bg-danger text-on-accent hover:opacity-90",
   }[variant];
   const cls = cn(
-    "inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition active:scale-[0.98]",
+    "inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition active:scale-[0.98]",
     styles,
     disabled && "pointer-events-none opacity-50",
     className,

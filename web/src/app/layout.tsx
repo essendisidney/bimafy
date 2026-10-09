@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Cormorant_Garamond, Outfit } from "next/font/google";
+import { Bricolage_Grotesque, Outfit } from "next/font/google";
 import { ServiceWorkerRegister } from "@/components/pwa";
 import { AuthProvider } from "@/lib/auth";
 import { THEME_BOOT_SCRIPT } from "@/lib/theme-boot";
@@ -10,16 +10,16 @@ const outfit = Outfit({
   subsets: ["latin"],
 });
 
-const cormorant = Cormorant_Garamond({
-  variable: "--font-cormorant",
+const bricolage = Bricolage_Grotesque({
+  variable: "--font-bricolage",
   subsets: ["latin"],
-  weight: ["500", "600", "700"],
+  weight: ["600", "700", "800"],
 });
 
 export const metadata: Metadata = {
-  title: "Bimafy — The End-to-End Insurance Operating Platform",
+  title: "Bimafy — Insurance, simplified",
   description:
-    "Bimafy is the technology infrastructure that runs an insurer, broker, MGA, agent network, or embedded-insurance business end to end.",
+    "Price cover in seconds, pay with M-Pesa, get your certificate on WhatsApp. Bimafy runs insurance end to end for customers, agents and insurers.",
   applicationName: "Bimafy",
   appleWebApp: { capable: true, title: "Bimafy", statusBarStyle: "black-translucent" },
   icons: {
@@ -30,8 +30,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f2f5f8" },
-    { media: "(prefers-color-scheme: dark)", color: "#0a1220" },
+    { media: "(prefers-color-scheme: light)", color: "#f6f4ee" },
+    { media: "(prefers-color-scheme: dark)", color: "#0b1410" },
   ],
   viewportFit: "cover",
 };
@@ -39,7 +39,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     // suppressHydrationWarning: the boot script may set data-theme before React hydrates.
-    <html lang="en" className={`${outfit.variable} ${cormorant.variable} h-full antialiased`} suppressHydrationWarning>
+    <html lang="en" className={`${outfit.variable} ${bricolage.variable} h-full antialiased`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_BOOT_SCRIPT }} />
       </head>

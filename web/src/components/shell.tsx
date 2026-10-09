@@ -9,6 +9,7 @@ import { roleLabel } from "@/lib/format";
 import { primaryNav, visibleNav, type NavItem } from "@/lib/nav";
 import { setFlag, useFlag } from "@/lib/prefs";
 import { CommandPalette } from "./command-palette";
+import { Logo } from "./logo";
 import { InstallButton, SyncStatus, WarmCurrentPage } from "./pwa";
 import { ThemeToggle } from "./theme-toggle";
 import { NAV_ICONS } from "./nav-icons";
@@ -123,8 +124,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           )}
         >
           <div className={cn("flex items-center py-5", collapsed ? "justify-center px-2" : "justify-between px-5")}>
-            <Link href="/app/dashboard" className="brand-mark text-gold" aria-label="Bimafy home">
-              {collapsed ? <span className="text-2xl">B</span> : <span className="text-3xl tracking-[0.08em]">Bimafy</span>}
+            <Link href="/app/dashboard" aria-label="Bimafy home">
+              <Logo tone="light" showWord={!collapsed} className="text-2xl" markClassName="h-9 w-9" />
             </Link>
           </div>
           <div className="min-h-0 flex-1 overflow-y-auto">{navList(collapsed)}</div>
@@ -148,7 +149,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <div className="absolute inset-0 bg-black/50 animate-fade-in" onClick={() => setDrawerOpen(false)} />
             <aside className="absolute inset-y-0 left-0 flex w-[85%] max-w-xs flex-col atmosphere-deep text-champagne shadow-lift animate-slide-in-left">
               <div className="flex items-center justify-between px-5 py-5">
-                <span className="brand-mark text-3xl tracking-[0.08em] text-gold">Bimafy</span>
+                <Logo tone="light" className="text-2xl" markClassName="h-9 w-9" />
                 <button
                   onClick={() => setDrawerOpen(false)}
                   className="grid h-9 w-9 place-items-center rounded-xl text-champagne/80 hover:bg-white/10"
@@ -176,7 +177,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             >
               <Menu className="h-[18px] w-[18px]" aria-hidden />
             </button>
-            <span className="brand-mark text-xl text-heading md:hidden">Bimafy</span>
+            <Logo className="text-xl md:hidden" markClassName="h-7 w-7" />
 
             <button
               onClick={() => setPaletteOpen(true)}

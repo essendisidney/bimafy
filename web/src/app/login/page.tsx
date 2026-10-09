@@ -5,6 +5,8 @@ import { useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { demoUsers } from "@/lib/seed";
 import { roleLabel } from "@/lib/format";
+import Link from "next/link";
+import { Logo } from "@/components/logo";
 import { Button, Field, inputClass } from "@/components/ui";
 
 export default function LoginPage() {
@@ -18,17 +20,17 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen atmosphere px-4 py-12">
       <main className="mx-auto max-w-4xl">
-        <p className="brand-mark text-4xl tracking-[0.08em] text-heading">Bimafy</p>
-        <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-teal">
-          Insurance OS · {mode}
-        </p>
+        <Link href="/" aria-label="Bimafy home">
+          <Logo className="text-4xl" markClassName="h-11 w-11" />
+        </Link>
+        <p className="mt-6 text-[11px] font-semibold uppercase tracking-[0.24em] text-teal-ink">Karibu tena · Welcome back</p>
         <h1 className="mt-4 font-display text-4xl text-heading md:text-5xl">
           {mode === "supabase" ? "Sign in to Bimafy" : "Enter as a persona"}
         </h1>
         <p className="mt-3 max-w-2xl text-mute">
           {mode === "supabase"
-            ? "Connected to Supabase Auth. Use a seeded demo account, or fall back to local personas while wiring roles."
-            : "No password required. Each role opens the same platform with different permissions."}
+            ? "Agents, brokers and staff: sign in with your work email. Just looking around? Try a demo role below — no password needed."
+            : "No password needed. Each role opens the same app with what that person would see."}
         </p>
 
         {mode === "supabase" ? (
@@ -66,7 +68,7 @@ export default function LoginPage() {
 
         <div className="mt-10">
           <p className="mb-4 text-sm font-medium text-heading">
-            {mode === "supabase" ? "Or continue with a local persona" : "Choose a persona"}
+            {mode === "supabase" ? "Or explore with a demo role" : "Choose a persona"}
           </p>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {demoUsers.map((user) => (

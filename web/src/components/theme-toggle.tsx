@@ -23,7 +23,7 @@ export function ThemeToggle({ className }: { className?: string }) {
           title={label}
           className={cn(
             "grid h-7 w-7 place-items-center rounded-lg transition",
-            theme === value ? "bg-forest text-champagne" : "text-mute hover:text-ink",
+            theme === value ? "bg-teal text-on-accent" : "text-mute hover:text-ink",
           )}
         >
           <Icon className="h-3.5 w-3.5" aria-hidden />

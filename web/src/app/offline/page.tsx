@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Logo } from "@/components/logo";
 
 export const metadata: Metadata = { title: "Offline · Bimafy" };
 
@@ -8,7 +9,7 @@ export default function OfflinePage() {
   return (
     <main className="grid min-h-dvh place-items-center bg-paper px-6 text-center">
       <div className="max-w-sm">
-        <p className="brand-mark text-4xl text-gold">Bimafy</p>
+        <Logo className="text-4xl" markClassName="h-11 w-11" />
         <h1 className="mt-6 font-display text-3xl text-heading">You&apos;re offline</h1>
         <p className="mt-3 text-sm text-mute">
           This page hasn&apos;t been opened on this phone yet, so it isn&apos;t saved for offline use. Your agent desk

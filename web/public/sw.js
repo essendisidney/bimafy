@@ -8,7 +8,7 @@
  * - API routes, non-GET requests and other origins (Supabase) are never touched;
  *   offline writes are queued by the app itself (src/lib/outbox.ts).
  */
-const VERSION = "v3";
+const VERSION = "v4";
 const PAGES = `bimafy-pages-${VERSION}`;
 const ASSETS = "bimafy-assets"; // hashed file names: never needs versioning
 const STATIC = `bimafy-static-${VERSION}`;

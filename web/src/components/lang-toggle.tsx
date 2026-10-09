@@ -18,7 +18,7 @@ export function LangToggle() {
           aria-pressed={lang === o.value}
           className={cn(
             "rounded-lg px-2.5 py-1.5 font-medium transition",
-            lang === o.value ? "bg-forest text-champagne" : "text-mute hover:text-ink",
+            lang === o.value ? "bg-teal text-on-accent" : "text-mute hover:text-ink",
           )}
         >
           {o.label}

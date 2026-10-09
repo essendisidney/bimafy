@@ -8,14 +8,14 @@ export function buildPolicyCertificateHtml(policy: Policy, operatorName = "Bimaf
   <meta charset="utf-8" />
   <title>Certificate ${policy.number}</title>
   <style>
-    body { font-family: Georgia, serif; color: #0B1F33; margin: 40px; }
-    .mark { letter-spacing: 0.2em; text-transform: uppercase; color: #0F766E; font-size: 12px; }
-    h1 { font-size: 28px; margin: 8px 0 4px; }
-    .box { border: 2px solid #C9A227; padding: 24px; margin-top: 24px; }
+    body { font-family: "Helvetica Neue", Arial, sans-serif; color: #13221B; margin: 40px; }
+    .mark { letter-spacing: 0.2em; text-transform: uppercase; color: #066640; font-size: 12px; font-weight: 700; }
+    h1 { font-size: 28px; margin: 8px 0 4px; letter-spacing: -0.02em; }
+    .box { border: 2px solid #08794C; border-radius: 16px; padding: 24px; margin-top: 24px; }
     table { width: 100%; border-collapse: collapse; margin-top: 16px; }
-    td { padding: 8px 0; border-bottom: 1px solid #D8E0E8; font-size: 14px; }
-    td:first-child { color: #64748B; width: 40%; }
-    .foot { margin-top: 32px; font-size: 12px; color: #64748B; }
+    td { padding: 8px 0; border-bottom: 1px solid #DDD8CA; font-size: 14px; }
+    td:first-child { color: #56645C; width: 40%; }
+    .foot { margin-top: 32px; font-size: 12px; color: #56645C; }
   </style>
 </head>
 <body>
