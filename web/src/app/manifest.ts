@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "InsuraX",
-    short_name: "InsuraX",
+    name: "Bimafy",
+    short_name: "Bimafy",
     description: "Sell, renew and service insurance from your phone — even with no signal.",
     id: "/app/dashboard",
     start_url: "/app/dashboard",

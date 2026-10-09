@@ -54,7 +54,7 @@ function parts(text: string) {
 }
 
 /**
- * InsuraX USSD shortcode flow (*384*90#).
+ * Bimafy USSD shortcode flow (*384*90#).
  * CON = continue, END = terminate (Africa's Talking convention).
  * Effects are applied by the console simulator / PAS webhook adapter.
  */
@@ -64,7 +64,7 @@ export function handleUssd(req: UssdRequest): UssdResponse {
 
   if (steps.length === 0) {
     return reply(req, "CON", [
-      "InsuraX",
+      "Bimafy",
       "1. Buy boda cover",
       "2. Pay contribution",
       "3. Check policy",
@@ -76,7 +76,7 @@ export function handleUssd(req: UssdRequest): UssdResponse {
 
   const [a, b, c] = steps;
 
-  if (a === "0") return reply(req, "END", ["Asante. InsuraX — one platform, every workflow."]);
+  if (a === "0") return reply(req, "END", ["Asante. Bimafy — one platform, every workflow."]);
 
   if (a === "1") {
     if (!b) {
@@ -106,7 +106,7 @@ export function handleUssd(req: UssdRequest): UssdResponse {
             type: "notify",
             channel: "sms",
             title: "Boda cover queued",
-            body: `InsuraX: ${plan} enrolment started for ${phone}. Complete M-Pesa STK to activate.`,
+            body: `Bimafy: ${plan} enrolment started for ${phone}. Complete M-Pesa STK to activate.`,
           },
         ],
       );

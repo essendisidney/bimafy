@@ -175,7 +175,7 @@ export function CommandPalette({ user, onClose }: { user: SessionUser; onClose: 
       <div
         role="dialog"
         aria-modal="true"
-        aria-label="Search InsuraX"
+        aria-label="Search Bimafy"
         className="w-full max-w-xl overflow-hidden rounded-2xl border border-line bg-surface shadow-lift animate-pop-in"
         onClick={(e) => e.stopPropagation()}
         onKeyDown={onKeyDown}

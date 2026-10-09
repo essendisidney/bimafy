@@ -85,7 +85,7 @@ export function InstallButton({ className, variant = "header" }: { className?: s
           )}
         >
           Tap <Share className="inline h-3.5 w-3.5 align-[-2px]" aria-label="Share" /> in Safari, then{" "}
-          <span className="font-medium">Add to Home Screen</span>. InsuraX then opens full screen and works offline.
+          <span className="font-medium">Add to Home Screen</span>. Bimafy then opens full screen and works offline.
         </p>
       ) : null}
     </div>

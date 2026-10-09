@@ -149,7 +149,7 @@ type Dict = {
 
 const en: Dict = {
   locale: "en-KE",
-  eyebrow: "InsuraX Agent",
+  eyebrow: "Bimafy Agent",
   title: (first) => `${first}'s desk`,
   description: (code, branch, license) =>
     `${code} · ${branch} · ${license}. Your day, your pipeline, your renewals and your money — in one place.`,
@@ -366,7 +366,7 @@ const en: Dict = {
 
 const sw: Dict = {
   locale: "sw-KE",
-  eyebrow: "Wakala wa InsuraX",
+  eyebrow: "Wakala wa Bimafy",
   title: (first) => `Dawati la ${first}`,
   description: (code, branch, license) =>
     `${code} · ${branch} · ${license}. Siku yako, wateja wako, bima za kuhuisha na pesa zako — mahali pamoja.`,
@@ -603,17 +603,17 @@ export function leadMessage(template: WaTemplate, lang: Lang, m: LeadMsg) {
   const line = agencyCopy[lang].line[m.line].toLowerCase();
   if (lang === "sw") {
     return {
-      follow_up: `Habari ${m.first}, ni ${m.agent} kutoka InsuraX. Nafuatilia kuhusu bima yako ya ${line} — ni wakati mzuri wa kuongea?`,
+      follow_up: `Habari ${m.first}, ni ${m.agent} kutoka Bimafy. Nafuatilia kuhusu bima yako ya ${line} — ni wakati mzuri wa kuongea?`,
       send_quote: `Habari ${m.first}, bima yako ya ${line} ni takriban ${m.price} kwa mwaka. Naweza kuiwasha leo — jibu NDIYO nikutumie ombi la M-Pesa.`,
       ask_payment: `Habari ${m.first}, niko tayari kuwasha bima yako ya ${line}. Jibu NDIYO na nitakutumia ombi la M-Pesa kwenye namba hii.`,
-      thank_you: `Asante ${m.first} kwa kuchagua InsuraX! Bima yako ya ${line} iko tayari. Nitumie ujumbe wakati wowote ukihitaji msaada au kuwasilisha dai.`,
+      thank_you: `Asante ${m.first} kwa kuchagua Bimafy! Bima yako ya ${line} iko tayari. Nitumie ujumbe wakati wowote ukihitaji msaada au kuwasilisha dai.`,
     }[template];
   }
   return {
-    follow_up: `Hi ${m.first}, this is ${m.agent} from InsuraX. Following up on your ${line} cover — is now a good time to talk?`,
+    follow_up: `Hi ${m.first}, this is ${m.agent} from Bimafy. Following up on your ${line} cover — is now a good time to talk?`,
     send_quote: `Hi ${m.first}, your ${line} cover comes to about ${m.price} a year. I can activate it today — reply YES and I'll send the M-Pesa prompt.`,
     ask_payment: `Hi ${m.first}, I'm ready to activate your ${line} cover. Reply YES and I'll send an M-Pesa request to this number.`,
-    thank_you: `Thank you ${m.first} for choosing InsuraX! Your ${line} cover is in place. Message me any time you need help or want to make a claim.`,
+    thank_you: `Thank you ${m.first} for choosing Bimafy! Your ${line} cover is in place. Message me any time you need help or want to make a claim.`,
   }[template];
 }
 
@@ -624,18 +624,18 @@ export function renewalMessage(
   const date = formatDay(m.expiry, lang);
   if (lang === "sw") {
     return m.expired
-      ? `Habari ${m.first}, ni ${m.agent} kutoka InsuraX. Bima yako ya ${m.product} (${m.number}) iliisha tarehe ${date}. Kwa sasa huna kinga — jibu NDIYO niihuishe leo kupitia M-Pesa.`
-      : `Habari ${m.first}, ni ${m.agent} kutoka InsuraX. Bima yako ya ${m.product} (${m.number}) inaisha tarehe ${date}. Jibu NDIYO nikutumie ombi la M-Pesa ili uendelee kulindwa.`;
+      ? `Habari ${m.first}, ni ${m.agent} kutoka Bimafy. Bima yako ya ${m.product} (${m.number}) iliisha tarehe ${date}. Kwa sasa huna kinga — jibu NDIYO niihuishe leo kupitia M-Pesa.`
+      : `Habari ${m.first}, ni ${m.agent} kutoka Bimafy. Bima yako ya ${m.product} (${m.number}) inaisha tarehe ${date}. Jibu NDIYO nikutumie ombi la M-Pesa ili uendelee kulindwa.`;
   }
   return m.expired
-    ? `Hi ${m.first}, this is ${m.agent} from InsuraX. Your ${m.product} (${m.number}) expired on ${date}, so you're not covered right now. Reply YES and I'll renew it today via M-Pesa.`
-    : `Hi ${m.first}, this is ${m.agent} from InsuraX. Your ${m.product} (${m.number}) renews on ${date}. Reply YES and I'll send the M-Pesa prompt to keep you covered.`;
+    ? `Hi ${m.first}, this is ${m.agent} from Bimafy. Your ${m.product} (${m.number}) expired on ${date}, so you're not covered right now. Reply YES and I'll renew it today via M-Pesa.`
+    : `Hi ${m.first}, this is ${m.agent} from Bimafy. Your ${m.product} (${m.number}) renews on ${date}. Reply YES and I'll send the M-Pesa prompt to keep you covered.`;
 }
 
 export function crossSellMessage(lang: Lang, m: { first: string; agent: string; line: ProductLine; reason: CrossSellReason; age?: number }) {
   const line = agencyCopy[lang].line[m.line].toLowerCase();
   const why = agencyCopy[lang].crossSell(m.reason, m.age);
   return lang === "sw"
-    ? `Habari ${m.first}, ni ${m.agent} kutoka InsuraX. Asante kwa kutuamini. Wateja wengi kama wewe huongeza bima ya ${line} — ${why.charAt(0).toLowerCase()}${why.slice(1)}. Nikutumie bei?`
-    : `Hi ${m.first}, this is ${m.agent} from InsuraX. Thanks for trusting us with your cover. Many clients like you also add ${line} cover — ${why.charAt(0).toLowerCase()}${why.slice(1)}. Shall I send you a price?`;
+    ? `Habari ${m.first}, ni ${m.agent} kutoka Bimafy. Asante kwa kutuamini. Wateja wengi kama wewe huongeza bima ya ${line} — ${why.charAt(0).toLowerCase()}${why.slice(1)}. Nikutumie bei?`
+    : `Hi ${m.first}, this is ${m.agent} from Bimafy. Thanks for trusting us with your cover. Many clients like you also add ${line} cover — ${why.charAt(0).toLowerCase()}${why.slice(1)}. Shall I send you a price?`;
 }

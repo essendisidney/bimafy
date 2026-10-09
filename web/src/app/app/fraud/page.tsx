@@ -43,7 +43,7 @@ export default function FraudPage() {
   return (
     <div>
       <PageHeader
-        eyebrow="InsuraX Fraud"
+        eyebrow="Bimafy Fraud"
         title="Fraud & anomaly detection"
         description="Clear, escalate, or hold payout before money moves. Every action writes an audit event."
       />

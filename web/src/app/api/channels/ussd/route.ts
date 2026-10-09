@@ -52,7 +52,7 @@ export async function POST(request: Request) {
 
 export async function GET() {
   return NextResponse.json({
-    service: "InsuraX USSD",
+    service: "Bimafy USSD",
     shortcode: "*384*90#",
     webhook: "/api/channels/ussd",
     format: "Africa's Talking CON/END plain text",

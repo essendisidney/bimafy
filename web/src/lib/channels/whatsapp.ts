@@ -16,17 +16,17 @@ export type WhatsAppReply = {
 const greetings = /^(hi|hello|salaam|salam|habari|hey)\b/i;
 
 /**
- * Lightweight WhatsApp care bot for InsuraX.
+ * Lightweight WhatsApp care bot for Bimafy.
  * Intent detection is keyword-based for the demo; production uses NLP + CRM.
  */
 export function replyWhatsApp(text: string, phone = "+254700000000"): WhatsAppReply {
   const q = text.trim();
-  if (!q) return { replies: ["Karibu InsuraX. Type HELP for options."] };
+  if (!q) return { replies: ["Karibu Bimafy. Type HELP for options."] };
 
   if (greetings.test(q) || /^help$/i.test(q)) {
     return {
       replies: [
-        "Hello. I am InsuraX Care.",
+        "Hello. I am Bimafy Care.",
         "You can ask: BALANCE, PAY 200, CLAIM, CERTIFICATE, AGENT, or BUY BODA.",
       ],
     };
@@ -94,7 +94,7 @@ export function replyWhatsApp(text: string, phone = "+254700000000"): WhatsAppRe
     return {
       replies: [
         "Your latest certificate is ready in Documents.",
-        "Open the InsuraX app → Documents, or ask an agent to resend by email.",
+        "Open the Bimafy app → Documents, or ask an agent to resend by email.",
       ],
       effects: [
         {
@@ -142,7 +142,7 @@ export function replyWhatsApp(text: string, phone = "+254700000000"): WhatsAppRe
   if (/surplus|shariah|halal/i.test(q)) {
     return {
       replies: [
-        "InsuraX supports wakala takaful and conventional books. Surplus may be declared after claims and expenses.",
+        "Bimafy supports wakala takaful and conventional books. Surplus may be declared after claims and expenses.",
         "Your FY25 provisional surplus share is shown on Home when available.",
       ],
     };

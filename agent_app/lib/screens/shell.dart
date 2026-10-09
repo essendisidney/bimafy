@@ -93,7 +93,7 @@ class HomeScreen extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('InsuraX', style: TextStyle(color: TaminColors.champagne.withOpacity(0.8), fontSize: 12, letterSpacing: 2)),
+                Text('Bimafy', style: TextStyle(color: TaminColors.champagne.withOpacity(0.8), fontSize: 12, letterSpacing: 2)),
                 Text(a.name, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
               ],
             ),

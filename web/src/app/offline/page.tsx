@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-export const metadata: Metadata = { title: "Offline · InsuraX" };
+export const metadata: Metadata = { title: "Offline · Bimafy" };
 
 /** Served by the service worker when a page that was never opened is requested with no signal. */
 export default function OfflinePage() {
   return (
     <main className="grid min-h-dvh place-items-center bg-paper px-6 text-center">
       <div className="max-w-sm">
-        <p className="brand-mark text-4xl text-gold">InsuraX</p>
+        <p className="brand-mark text-4xl text-gold">Bimafy</p>
         <h1 className="mt-6 font-display text-3xl text-heading">You&apos;re offline</h1>
         <p className="mt-3 text-sm text-mute">
           This page hasn&apos;t been opened on this phone yet, so it isn&apos;t saved for offline use. Your agent desk

@@ -18,12 +18,12 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen atmosphere px-4 py-12">
       <main className="mx-auto max-w-4xl">
-        <p className="brand-mark text-4xl tracking-[0.08em] text-heading">InsuraX</p>
+        <p className="brand-mark text-4xl tracking-[0.08em] text-heading">Bimafy</p>
         <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-teal">
           Insurance OS · {mode}
         </p>
         <h1 className="mt-4 font-display text-4xl text-heading md:text-5xl">
-          {mode === "supabase" ? "Sign in to InsuraX" : "Enter as a persona"}
+          {mode === "supabase" ? "Sign in to Bimafy" : "Enter as a persona"}
         </h1>
         <p className="mt-3 max-w-2xl text-mute">
           {mode === "supabase"

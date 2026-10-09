@@ -136,7 +136,7 @@ function WhatsAppSimulator() {
     {
       id: "m0",
       from: "bot",
-      text: "Karibu InsuraX Care. Type HELP for options.",
+      text: "Karibu Bimafy Care. Type HELP for options.",
       at: new Date().toISOString(),
     },
   ]);
@@ -171,7 +171,7 @@ function WhatsAppSimulator() {
         <div className="flex items-center justify-between">
           <div>
             <p className="text-[11px] uppercase tracking-[0.2em] text-white/70">WhatsApp</p>
-            <p className="mt-1 font-display text-2xl">InsuraX Care</p>
+            <p className="mt-1 font-display text-2xl">Bimafy Care</p>
           </div>
           <span className="rounded-lg border border-white/30 bg-white/15 px-2.5 py-0.5 text-xs text-white">{handoff ? "Pending" : "Active"}</span>
         </div>

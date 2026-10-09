@@ -1,23 +1,23 @@
-# InsuraX
+# Bimafy
 
 **The End-to-End Insurance Operating Platform**
 
-Not just an insurance marketplace. InsuraX is the technology infrastructure that runs an insurer, broker, MGA, agent network, or embedded-insurance business end to end.
+Not just an insurance marketplace. Bimafy is the technology infrastructure that runs an insurer, broker, MGA, agent network, or embedded-insurance business end to end.
 
 > **One platform. Every insurance workflow. One source of truth.**
 
 | Product | What it runs |
 | --- | --- |
-| **InsuraX Core** | Policy administration |
-| **InsuraX Risk** | Underwriting & risk scoring |
-| **InsuraX Claims** | Digital claims management |
-| **InsuraX Pay** | Premiums, collections & reconciliation |
-| **InsuraX Fraud** | Fraud & anomaly detection |
-| **InsuraX Connect** | APIs & embedded insurance |
-| **InsuraX Agent** | Agency / broker ecosystem |
-| **InsuraX AI** | Intelligence, automation & decisioning |
-| **InsuraX Data** | Analytics & regulatory reporting |
-| **InsuraX Customer** | Customer self-service |
+| **Bimafy Core** | Policy administration |
+| **Bimafy Risk** | Underwriting & risk scoring |
+| **Bimafy Claims** | Digital claims management |
+| **Bimafy Pay** | Premiums, collections & reconciliation |
+| **Bimafy Fraud** | Fraud & anomaly detection |
+| **Bimafy Connect** | APIs & embedded insurance |
+| **Bimafy Agent** | Agency / broker ecosystem |
+| **Bimafy AI** | Intelligence, automation & decisioning |
+| **Bimafy Data** | Analytics & regulatory reporting |
+| **Bimafy Customer** | Customer self-service |
 
 This repo ships a working **Next.js console** (`web/`), a **Postgres/Supabase schema** (`supabase/`), and an **offline-first Flutter field app** (`agent_app/`). Kenya demo data is included so you can walk the journey without wiring keys first.
 
@@ -52,7 +52,7 @@ Useful paths:
 
 ### Supabase
 
-Copy `web/.env.example` to `web/.env.local` and point at the InsuraX project:
+Copy `web/.env.example` to `web/.env.local` and point at your Supabase project:
 
 ```
 NEXT_PUBLIC_SUPABASE_URL=https://mzrilftjlnnlntzogkws.supabase.co

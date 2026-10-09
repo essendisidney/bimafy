@@ -22,7 +22,7 @@ class TaminAgentApp extends StatelessWidget {
     return ChangeNotifierProvider.value(
       value: store,
       child: MaterialApp(
-        title: 'InsuraX Agent',
+        title: 'Bimafy Agent',
         debugShowCheckedModeBanner: false,
         theme: buildTaminTheme(),
         home: store.ready ? const AgentShell() : const _Boot(),

@@ -10,7 +10,7 @@ import type {
 } from "../types";
 
 /**
- * InsuraX Agent engine: lead scoring, follow-up agenda, renewals, commission
+ * Bimafy Agent engine: lead scoring, follow-up agenda, renewals, commission
  * statements, target forecasting and cross-sell. Pure functions — every
  * time-dependent call takes `now` so the desk is reproducible and testable.
  */

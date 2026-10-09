@@ -44,10 +44,10 @@ export default function Home() {
   return (
     <div className="min-h-screen atmosphere text-ink">
       <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
-        <div className="brand-mark text-3xl tracking-[0.08em] text-heading">InsuraX</div>
+        <div className="brand-mark text-3xl tracking-[0.08em] text-heading">Bimafy</div>
         <nav className="flex items-center gap-3 text-sm sm:gap-4">
           <a href="#why" className="hidden text-mute transition hover:text-ink sm:inline">
-            Why InsuraX
+            Why Bimafy
           </a>
           <a href="#agents" className="hidden text-mute transition hover:text-ink sm:inline">
             For agents
@@ -65,7 +65,7 @@ export default function Home() {
 
         <section id="why" className="border-t border-line/80 bg-surface/50 py-16">
           <div className="mx-auto max-w-6xl px-6">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-teal">Why InsuraX</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-teal">Why Bimafy</p>
             <h2 className="mt-3 max-w-3xl font-display text-4xl text-heading md:text-5xl">
               Others sell policies. We run the whole machine — so it gets cheaper and faster with every customer.
             </h2>
@@ -90,7 +90,7 @@ export default function Home() {
                   Open the app. Know exactly who to call and how much you&apos;ll earn.
                 </h2>
                 <p className="mt-4 max-w-md text-champagne/80">
-                  The best agents don&apos;t work harder — they work the right lead at the right time. InsuraX does the
+                  The best agents don&apos;t work harder — they work the right lead at the right time. Bimafy does the
                   sorting so you can do the selling.
                 </p>
                 <EnterAs
@@ -121,7 +121,7 @@ export default function Home() {
               {modules.map((mod) => (
                 <div key={mod.slug} className="bg-paper p-5 transition hover:bg-surface">
                   <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-teal">{mod.code}</p>
-                  <h3 className="mt-2 font-display text-2xl text-heading">{mod.name.replace("InsuraX ", "")}</h3>
+                  <h3 className="mt-2 font-display text-2xl text-heading">{mod.name.replace("Bimafy ", "")}</h3>
                   <p className="mt-2 text-sm leading-relaxed text-mute">{mod.tagline}</p>
                 </div>
               ))}

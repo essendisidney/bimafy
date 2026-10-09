@@ -7,7 +7,7 @@ export type PartnerAuth = {
 };
 
 const DEFAULT_PARTNERS: PartnerAuth[] = [
-  { partnerId: "ptn-demo", name: "InsuraX Demo Embed", key: "insurax_pk_demo" },
+  { partnerId: "ptn-demo", name: "Bimafy Demo Embed", key: "insurax_pk_demo" },
   { partnerId: "ptn-sacco", name: "Demo SACCO Gateway", key: "insurax_pk_sacco" },
   { partnerId: "ptn-ride", name: "Demo Ride-hailing", key: "insurax_pk_ride" },
 ];
