@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Logo } from "@/components/logo";
-import { PRODUCT_OF } from "@/lib/brand";
 
 export const metadata: Metadata = { title: "Offline · Bimafy" };
 
@@ -27,7 +26,6 @@ export default function OfflinePage() {
             Dashboard
           </Link>
         </div>
-        <p className="mt-10 text-xs text-mute">{PRODUCT_OF}</p>
       </div>
     </main>
   );

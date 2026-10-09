@@ -5,7 +5,6 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { LogOut, Menu, MoreHorizontal, PanelLeftClose, PanelLeftOpen, Search, X } from "lucide-react";
 import { useAuth } from "@/lib/auth";
-import { PRODUCT_OF } from "@/lib/brand";
 import { roleLabel } from "@/lib/format";
 import { primaryNav, visibleNav, type NavItem } from "@/lib/nav";
 import { setFlag, useFlag } from "@/lib/prefs";
@@ -165,7 +164,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 <span>Appearance</span>
                 <ThemeToggle />
               </div>
-              <p className="px-5 pb-4 text-[11px] text-champagne/50">{PRODUCT_OF}</p>
             </aside>
           </div>
         ) : null}

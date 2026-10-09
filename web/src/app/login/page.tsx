@@ -7,7 +7,6 @@ import { demoUsers } from "@/lib/seed";
 import { roleLabel } from "@/lib/format";
 import Link from "next/link";
 import { Logo } from "@/components/logo";
-import { PRODUCT_OF } from "@/lib/brand";
 import { Button, Field, inputClass } from "@/components/ui";
 
 export default function LoginPage() {
@@ -88,7 +87,6 @@ export default function LoginPage() {
             ))}
           </div>
         </div>
-        <p className="mt-12 text-xs text-mute">{PRODUCT_OF}</p>
       </main>
     </div>
   );
