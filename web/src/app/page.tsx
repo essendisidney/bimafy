@@ -1,30 +1,7 @@
 import Link from "next/link";
-import { EnterAs, InstantQuote } from "@/components/instant-quote";
+import { EnterAs } from "@/components/instant-quote";
+import { LandingHero, LangToggle } from "@/components/landing-hero";
 import { modules } from "@/lib/modules";
-
-const DOORS = [
-  {
-    who: "I need cover",
-    promise: "Price in seconds, pay with M-Pesa, certificate on WhatsApp.",
-    cta: "Open my cover",
-    userId: "u-part",
-    href: "/app/customer",
-  },
-  {
-    who: "I sell insurance",
-    promise: "Today's follow-ups, renewals at risk and same-day commission — on one screen.",
-    cta: "Open my agent desk",
-    userId: "u-agent",
-    href: "/app/agent",
-  },
-  {
-    who: "I run an insurer, MGA or broker",
-    promise: "Products, underwriting, claims, collections and IRA reporting on one ledger.",
-    cta: "Open the operator console",
-    userId: "u-admin",
-    href: "/app/dashboard",
-  },
-];
 
 const MOAT = [
   {
@@ -66,13 +43,14 @@ export default function Home() {
     <div className="min-h-screen atmosphere text-ink">
       <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6">
         <div className="brand-mark text-3xl tracking-[0.08em] text-forest">InsuraX</div>
-        <nav className="flex items-center gap-4 text-sm">
+        <nav className="flex items-center gap-3 text-sm sm:gap-4">
           <a href="#why" className="hidden text-mute transition hover:text-ink sm:inline">
             Why InsuraX
           </a>
           <a href="#agents" className="hidden text-mute transition hover:text-ink sm:inline">
             For agents
           </a>
+          <LangToggle />
           <Link href="/login" className="rounded-xl bg-forest px-4 py-2.5 text-champagne transition hover:bg-navy">
             Sign in
           </Link>
@@ -80,43 +58,7 @@ export default function Home() {
       </header>
 
       <main>
-        <section className="mx-auto grid max-w-6xl gap-10 px-6 pb-14 pt-4 md:grid-cols-[1.05fr_0.95fr] md:items-center md:pb-20">
-          <div className="animate-rise">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-teal">
-              Insurance, at the speed of M-Pesa
-            </p>
-            <h1 className="mt-4 font-display text-5xl leading-[1.02] text-forest md:text-6xl">
-              See your price before you finish reading this sentence.
-            </h1>
-            <p className="mt-5 max-w-lg text-lg leading-relaxed text-mute">
-              InsuraX prices, approves and issues cover in one flow — for the person buying it, the agent selling it,
-              and the insurer carrying it.
-            </p>
-
-            <div className="mt-8 space-y-2">
-              {DOORS.map((d) => (
-                <EnterAs
-                  key={d.userId}
-                  userId={d.userId}
-                  href={d.href}
-                  className="group flex w-full items-center justify-between gap-4 rounded-2xl border border-line bg-white/70 px-4 py-3 text-left transition hover:border-teal hover:bg-white"
-                >
-                  <span>
-                    <span className="block font-medium text-forest">{d.who}</span>
-                    <span className="block text-sm text-mute">{d.promise}</span>
-                  </span>
-                  <span className="shrink-0 text-sm font-medium text-teal transition group-hover:translate-x-0.5">
-                    {d.cta} →
-                  </span>
-                </EnterAs>
-              ))}
-            </div>
-          </div>
-
-          <div className="animate-rise-delay">
-            <InstantQuote />
-          </div>
-        </section>
+        <LandingHero />
 
         <section id="why" className="border-t border-line/80 bg-white/50 py-16">
           <div className="mx-auto max-w-6xl px-6">
