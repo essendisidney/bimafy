@@ -32,7 +32,8 @@ export function priceQuote(req: QuoteRequest): PricedQuote {
 
   let annual = 0;
   if (req.product.ratingBasis === "flat") {
-    annual = req.product.minContribution;
+    // Flat products are priced per their shortest instalment (e.g. KES 30/day for boda).
+    annual = req.product.minContribution / frequencyFactor(req.product.frequencies[0] ?? "annually");
   } else if (req.product.ratingBasis === "age_band") {
     const age = num(req.risk.age) ?? 30;
     const band = age < 18 ? 0.8 : age < 35 ? 1 : age < 50 ? 1.25 : 1.6;

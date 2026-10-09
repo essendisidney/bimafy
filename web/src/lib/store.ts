@@ -26,6 +26,7 @@ import type {
   JournalEntry,
   KycStatus,
   Lead,
+  LeadActivity,
   NotificationItem,
   Payment,
   PlatformState,
@@ -173,6 +174,16 @@ export const platformStore = {
   },
   updateLead(id: string, patch: Partial<Lead>) {
     state = { ...state, leads: state.leads.map((l) => (l.id === id ? { ...l, ...patch } : l)) };
+    emit();
+  },
+  logLeadActivity(id: string, activity: Omit<LeadActivity, "id" | "at">, patch: Partial<Lead> = {}) {
+    const row: LeadActivity = { id: `act-${crypto.randomUUID().slice(0, 8)}`, at: new Date().toISOString(), ...activity };
+    state = {
+      ...state,
+      leads: state.leads.map((l) =>
+        l.id === id ? { ...l, ...patch, activities: [row, ...(l.activities ?? [])] } : l,
+      ),
+    };
     emit();
   },
   addTicket(ticket: Ticket) {

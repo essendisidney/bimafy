@@ -263,15 +263,33 @@ export type Payment = {
   receipt?: string;
 };
 
+export type LeadStatus = "new" | "contacted" | "quoted" | "won" | "lost";
+export type LeadSource = "referral" | "walk_in" | "whatsapp" | "ussd" | "campaign" | "bulk_import" | "partner" | "renewal";
+
+export type LeadActivity = {
+  id: string;
+  at: string;
+  kind: "call" | "whatsapp" | "sms" | "meeting" | "note" | "status";
+  summary: string;
+};
+
 export type Lead = {
   id: string;
   name: string;
   phone: string;
   productLine: ProductLine;
-  status: "new" | "contacted" | "quoted" | "won" | "lost";
+  status: LeadStatus;
   agentId?: string;
   brokerId?: string;
   notes: string;
+  /** Estimated annual contribution if won (KES). */
+  value?: number;
+  source?: LeadSource;
+  createdAt?: string;
+  /** ISO date (YYYY-MM-DD) of the next promised follow-up. */
+  nextActionAt?: string;
+  lostReason?: string;
+  activities?: LeadActivity[];
 };
 
 export type Ticket = {

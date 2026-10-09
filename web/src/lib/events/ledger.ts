@@ -2,7 +2,8 @@
 
 import { persistJournal, persistPayment } from "@/lib/data";
 import { buildPolicyCertificateHtml } from "@/lib/documents/certificate";
-import { brokers } from "@/lib/seed";
+import { commissionRate } from "@/lib/engines/agency";
+import { brokers, products } from "@/lib/seed";
 import { platformStore } from "@/lib/store";
 import { enqueueWebhook } from "@/lib/webhooks";
 import type {
@@ -202,8 +203,6 @@ export function recordChannelPayment(input: {
   });
 }
 
-const AGENT_COMMISSION = 0.1;
-
 function creditCommission(policy: Policy | null | undefined, contribution: number) {
   if (!policy || contribution <= 0) return;
   if (policy.brokerId) {
@@ -220,7 +219,8 @@ function creditCommission(policy: Policy | null | undefined, contribution: numbe
     return;
   }
   if (policy.agentId) {
-    const commission = Math.round(contribution * AGENT_COMMISSION);
+    const line = products.find((p) => p.id === policy.productId)?.line;
+    const commission = Math.round(contribution * commissionRate(line));
     platformStore.creditDistributor(policy.agentId, commission, contribution);
     postJournal({
       reference: `COMM-${policy.number}`,
