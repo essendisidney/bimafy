@@ -20,6 +20,9 @@ create index if not exists leads_broker_idx on leads (broker_id) where broker_id
 -- RLS: a lead belongs to its agent or broker. 00007 let every staff role
 -- (including every other agent) read and edit all leads — replace that.
 -- ---------------------------------------------------------------------------
+-- Live project: applied 2026-10-09 as 20261009085750_agency_desk WITHOUT this
+-- drop (the Supabase tool holds destructive statements for confirmation); run it
+-- once in the SQL editor. Until then the old rule still lets all staff see leads.
 drop policy if exists staff_all_leads on leads;
 
 drop policy if exists leads_own_distributor on leads;

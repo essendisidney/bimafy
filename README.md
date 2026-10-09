@@ -72,7 +72,9 @@ set role = 'admin',
 where email = 'admin@insurax.africa';
 ```
 
-Apply migrations with `supabase db push` (or paste each file in `supabase/migrations/` into the SQL editor, in order).
+Migrations live in `supabase/migrations/` (`00001`–`00011`). The live project records them under timestamp versions (e.g. `20261009085750_agency_desk`) because they were applied through the dashboard/MCP rather than the CLI, so **don't run `supabase db push`** against it — it would try to re-apply everything. Apply a new migration by pasting the file into the SQL editor (or via the Supabase MCP `apply_migration`), then keep the file here as the record.
+
+To set up a fresh project instead, run the files in order.
 
 Leads are stored in Supabase for signed-in users. Row-level security limits agents and brokers to their own leads, while `admin`, `branch_manager` and `call_center` see every lead in their operator. Link a login to its distributor record with `update agents set profile_id = '<auth user id>' where agent_code = 'AG-KE-0142';` (and the same on `brokers`). Local personas from the login screen stay on demo data.
 
