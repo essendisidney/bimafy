@@ -7,7 +7,7 @@ import { pushNotification } from "@/lib/events/ledger";
 import { useAuth } from "@/lib/auth";
 import { persistQuote, useParticipants, useProducts } from "@/lib/data";
 import { money } from "@/lib/format";
-import { platformStore, usePlatform } from "@/lib/store";
+import { updateLead, useLeads } from "@/lib/leads";
 import type { Frequency } from "@/lib/types";
 import { Badge, Button, Card, Field, PageHeader, inputClass } from "@/components/ui";
 
@@ -21,7 +21,7 @@ function NewQuoteForm() {
   const { user, operatorId } = useAuth();
   const { products } = useProducts();
   const { participants } = useParticipants();
-  const { leads } = usePlatform();
+  const { leads } = useLeads();
   const preset = params.get("product");
   const leadId = params.get("lead");
   const lead = leadId ? leads.find((l) => l.id === leadId) : undefined;
@@ -265,7 +265,7 @@ function NewQuoteForm() {
                   body: `${number} for ${quoteName} · ${money(priced.total)} · UW ${priced.uwDecision}`,
                 });
                 if (lead) {
-                  platformStore.updateLead(lead.id, { status: "quoted" });
+                  await updateLead(lead.id, { status: "quoted" });
                 }
                 router.push(`/app/quotes/${id}`);
               } catch (err) {

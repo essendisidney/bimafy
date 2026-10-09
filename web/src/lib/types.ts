@@ -139,6 +139,8 @@ export type Participant = {
 
 export type Agent = {
   id: string;
+  /** Supabase agents.id when this demo agent is seeded in the database. */
+  dbId?: string;
   code: string;
   name: string;
   phone: string;
@@ -151,6 +153,8 @@ export type Agent = {
 
 export type Broker = {
   id: string;
+  /** Supabase brokers.id when this demo broker is seeded in the database. */
+  dbId?: string;
   code: string;
   name: string;
   license: string;
@@ -263,15 +267,33 @@ export type Payment = {
   receipt?: string;
 };
 
+export type LeadStatus = "new" | "contacted" | "quoted" | "won" | "lost";
+export type LeadSource = "referral" | "walk_in" | "whatsapp" | "ussd" | "campaign" | "bulk_import" | "partner" | "renewal";
+
+export type LeadActivity = {
+  id: string;
+  at: string;
+  kind: "call" | "whatsapp" | "sms" | "meeting" | "note" | "status";
+  summary: string;
+};
+
 export type Lead = {
   id: string;
   name: string;
   phone: string;
   productLine: ProductLine;
-  status: "new" | "contacted" | "quoted" | "won" | "lost";
+  status: LeadStatus;
   agentId?: string;
   brokerId?: string;
   notes: string;
+  /** Estimated annual contribution if won (KES). */
+  value?: number;
+  source?: LeadSource;
+  createdAt?: string;
+  /** ISO date (YYYY-MM-DD) of the next promised follow-up. */
+  nextActionAt?: string;
+  lostReason?: string;
+  activities?: LeadActivity[];
 };
 
 export type Ticket = {

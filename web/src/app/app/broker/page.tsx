@@ -6,7 +6,8 @@ import { brokers, participants } from "@/lib/seed";
 import { useAuth } from "@/lib/auth";
 import { withdrawCommission } from "@/lib/events/ledger";
 import { money, pct } from "@/lib/format";
-import { platformStore, usePlatform } from "@/lib/store";
+import { createLeads, distributorKey, newLeadId, ownsLead, updateLead, useLeads } from "@/lib/leads";
+import { usePlatform } from "@/lib/store";
 import type { Lead, ProductLine } from "@/lib/types";
 import { Badge, Button, Card, Field, PageHeader, Stat, Table, inputClass } from "@/components/ui";
 
@@ -23,12 +24,14 @@ const LINE_MAP: Record<string, ProductLine> = {
 };
 
 export default function BrokerPage() {
-  const { user } = useAuth();
-  const { leads, quotes, policies, balanceDeltas } = usePlatform();
-  const broker = brokers.find((b) => b.id === user?.brokerId) ?? brokers[0];
+  const { user, operatorId } = useAuth();
+  const { quotes, policies, balanceDeltas } = usePlatform();
+  const { leads, error: leadsError, mode } = useLeads();
+  const broker = brokers.find((b) => b.id === user?.brokerId || b.dbId === user?.brokerId) ?? brokers[0];
+  const leadOwner = mode === "supabase" && user?.brokerId ? user.brokerId : distributorKey(broker);
   const delta = balanceDeltas[broker.id] ?? { wallet: 0, gwp: 0 };
   const liveWallet = broker.wallet + delta.wallet;
-  const myLeads = leads.filter((l) => l.brokerId === broker.id);
+  const myLeads = leads.filter((l) => l.brokerId === leadOwner || ownsLead(broker, l.brokerId));
   const myPolicies = policies.filter((p) => p.brokerId === broker.id || (p.channel === "broker" && !p.brokerId));
   const myQuotes = quotes.filter((q) => q.brokerId === broker.id || q.channel === "broker");
   const bookGwp = myPolicies.reduce((s, p) => s + p.contribution, 0) + delta.gwp;
@@ -51,7 +54,7 @@ export default function BrokerPage() {
 
   const clients = participants.filter((p) => clientIds.has(p.id));
 
-  function importCsv() {
+  async function importCsv() {
     const lines = csv
       .split(/\r?\n/)
       .map((l) => l.trim())
@@ -70,7 +73,7 @@ export default function BrokerPage() {
       return;
     }
 
-    let added = 0;
+    const rows: Lead[] = [];
     for (const row of lines.slice(1)) {
       const cols = row.split(",").map((c) => c.trim());
       const name = cols[nameIdx];
@@ -79,16 +82,20 @@ export default function BrokerPage() {
       const rawLine = (lineIdx >= 0 ? cols[lineIdx] : "motor").toLowerCase();
       const productLine = LINE_MAP[rawLine] ?? "motor";
       const lead: Lead = {
-        id: `ld-${crypto.randomUUID().slice(0, 8)}`,
+        id: newLeadId(),
         name,
         phone: phone.startsWith("+") ? phone : `+${phone}`,
         productLine,
         status: "new",
-        brokerId: broker.id,
+        brokerId: leadOwner,
         notes: notesIdx >= 0 ? cols[notesIdx] ?? "Bulk import" : "Bulk import",
       };
-      platformStore.addLead(lead);
-      added += 1;
+      rows.push(lead);
+    }
+    const added = rows.length;
+    if (added && !(await createLeads(rows, operatorId))) {
+      setImportMsg("");
+      return;
     }
     setImportMsg(`Imported ${added} schedule row${added === 1 ? "" : "s"} into broker leads.`);
   }
@@ -157,6 +164,11 @@ export default function BrokerPage() {
 
         <Card className="space-y-3 p-5">
           <h2 className="font-display text-xl">Bulk schedule import</h2>
+          {leadsError ? (
+            <p role="alert" className="rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-800">
+              {leadsError}
+            </p>
+          ) : null}
           <p className="text-sm text-mute">
             Paste CSV for fleets or SACCO schedules. Creates broker leads (idempotent policy numbers come at bind time via{" "}
             <code className="text-ink">/api/v1</code>).
@@ -191,21 +203,21 @@ export default function BrokerPage() {
                         <Button
                           variant="ghost"
                           className="!px-2 !py-1 text-xs"
-                          onClick={() => platformStore.updateLead(l.id, { status: "contacted" })}
+                          onClick={() => void updateLead(l.id, { status: "contacted" })}
                         >
                           Contact
                         </Button>
                         <Button
                           variant="ghost"
                           className="!px-2 !py-1 text-xs"
-                          onClick={() => platformStore.updateLead(l.id, { status: "quoted" })}
+                          onClick={() => void updateLead(l.id, { status: "quoted" })}
                         >
                           Quoted
                         </Button>
                         <Button
                           variant="ghost"
                           className="!px-2 !py-1 text-xs"
-                          onClick={() => platformStore.updateLead(l.id, { status: "won" })}
+                          onClick={() => void updateLead(l.id, { status: "won" })}
                         >
                           Won
                         </Button>
