@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { scoreClaim } from "@/lib/engines/fraud";
 import { pushNotification, postJournal } from "@/lib/events/ledger";
@@ -29,13 +29,9 @@ function NewClaimForm() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (presetPolicy && options.some((p) => p.id === presetPolicy)) {
-      setPolicyId(presetPolicy);
-      return;
-    }
-    if (!policyId && options[0]?.id) setPolicyId(options[0].id);
-  }, [options, policyId, presetPolicy]);
+  // The ?policy= preset is only a default: an explicit pick always wins.
+  const resolvedPolicyId =
+    policyId || (presetPolicy && options.some((p) => p.id === presetPolicy) ? presetPolicy : options[0]?.id ?? "");
 
   return (
     <div>
@@ -46,7 +42,7 @@ function NewClaimForm() {
       />
       <Card className="max-w-2xl space-y-4 p-5">
         <Field label="Policy">
-          <select className={inputClass} value={policyId} onChange={(e) => setPolicyId(e.target.value)}>
+          <select className={inputClass} value={resolvedPolicyId} onChange={(e) => setPolicyId(e.target.value)}>
             {options.map((p) => (
               <option key={p.id} value={p.id}>
                 {p.number} · {p.productName}
@@ -108,13 +104,13 @@ function NewClaimForm() {
         {error ? <p className="text-sm text-danger">{error}</p> : null}
         <Button
           onClick={async () => {
-            const policy = policies.find((p) => p.id === policyId);
+            const policy = policies.find((p) => p.id === resolvedPolicyId);
             if (!policy) return;
             setSaving(true);
             setError(null);
             try {
               const fraud = scoreClaim(
-                { claimed, incidentDate, reportedAt: new Date().toISOString(), location, policyId },
+                { claimed, incidentDate, reportedAt: new Date().toISOString(), location, policyId: resolvedPolicyId },
                 policy,
                 claims,
               );

@@ -91,7 +91,7 @@ export default function ProfilePage() {
           ) : null}
           <p className="pt-2 text-xs text-mute">
             Certificates and KYC files live on the{" "}
-            <a href="/app/documents" className="text-teal underline-offset-2 hover:underline">
+            <a href="/app/documents" className="text-teal underline decoration-teal/40 underline-offset-2 hover:decoration-teal">
               Documents
             </a>{" "}
             desk. IPRS updates from Compliance.

@@ -62,7 +62,7 @@ export default function FinancePage() {
         <p className="font-medium text-ink">Surplus workflow</p>
         <p className="mt-2 text-mute">
           Declare and allocate participant surplus on the{" "}
-          <a href="/app/shariah" className="text-teal underline-offset-2 hover:underline">
+          <a href="/app/shariah" className="text-teal underline decoration-teal/40 underline-offset-2 hover:decoration-teal">
             Surplus &amp; Shariah
           </a>{" "}
           desk. Payments auto-post journals via the event ledger.

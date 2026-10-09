@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { applyChannelEffects } from "@/lib/channels/apply_effects";
 import { handleUssd } from "@/lib/channels/ussd";
 import { replyWhatsApp, type WhatsAppMessage } from "@/lib/channels/whatsapp";
-import { Badge, Button, Card, Field, PageHeader, inputClass } from "@/components/ui";
+import { Button, Card, Field, PageHeader, inputClass } from "@/components/ui";
 
 export default function ChannelsPage() {
   return (
@@ -147,7 +147,7 @@ function WhatsAppSimulator() {
     const trimmed = text.trim();
     if (!trimmed) return;
     const customer: WhatsAppMessage = {
-      id: `c-${Date.now()}`,
+      id: `c-${crypto.randomUUID()}`,
       from: "customer",
       text: trimmed,
       at: new Date().toISOString(),
@@ -173,7 +173,7 @@ function WhatsAppSimulator() {
             <p className="text-[11px] uppercase tracking-[0.2em] text-white/70">WhatsApp</p>
             <p className="mt-1 font-display text-2xl">InsuraX Care</p>
           </div>
-          {handoff ? <Badge status="pending" /> : <Badge status="active" />}
+          <span className="rounded-lg border border-white/30 bg-white/15 px-2.5 py-0.5 text-xs text-white">{handoff ? "Pending" : "Active"}</span>
         </div>
       </div>
       <div className="theme-light flex h-[420px] flex-col bg-[#ece5dd]">

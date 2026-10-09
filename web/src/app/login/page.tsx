@@ -17,7 +17,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen atmosphere px-4 py-12">
-      <div className="mx-auto max-w-4xl">
+      <main className="mx-auto max-w-4xl">
         <p className="brand-mark text-4xl tracking-[0.08em] text-heading">InsuraX</p>
         <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.24em] text-teal">
           Insurance OS · {mode}
@@ -86,7 +86,7 @@ export default function LoginPage() {
             ))}
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

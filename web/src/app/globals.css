@@ -14,10 +14,11 @@
   --forest: #0b1f3a;
   --navy: #122848;
   --teal: #0e7c66;
+  --teal-ink: #08624f;
   --mint: #1fa88a;
   --on-accent: #ffffff;
   --gold: #c9a227;
-  --gold-ink: #8a6d12;
+  --gold-ink: #765d0e;
   --champagne: #e8d5a3;
   --danger: #b42318;
   --shadow-soft: 0 18px 40px rgba(10, 22, 40, 0.08);
@@ -43,6 +44,7 @@
     --forest: #0d2440;
     --navy: #16304f;
     --teal: #34c3a0;
+    --teal-ink: #34c3a0;
     --mint: #5fd6b8;
     --on-accent: #04131f;
     --gold: #d9b44a;
@@ -66,6 +68,7 @@
   --forest: #0d2440;
   --navy: #16304f;
   --teal: #34c3a0;
+  --teal-ink: #34c3a0;
   --mint: #5fd6b8;
   --on-accent: #04131f;
   --gold: #d9b44a;
@@ -89,6 +92,7 @@
   --color-forest: var(--forest);
   --color-navy: var(--navy);
   --color-teal: var(--teal);
+  --color-teal-ink: var(--teal-ink);
   --color-mint: var(--mint);
   --color-on-accent: var(--on-accent);
   --color-gold: var(--gold);

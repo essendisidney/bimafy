@@ -263,11 +263,11 @@ export default function CompliancePage() {
           {message ? <p className="text-sm text-teal">{message}</p> : null}
           <p className="text-xs text-mute">
             Also on{" "}
-            <a href="/app/integrations" className="text-teal underline-offset-2 hover:underline">
+            <a href="/app/integrations" className="text-teal underline decoration-teal/40 underline-offset-2 hover:decoration-teal">
               Partners &amp; OCR
             </a>{" "}
             and{" "}
-            <a href="/app/shariah" className="text-teal underline-offset-2 hover:underline">
+            <a href="/app/shariah" className="text-teal underline decoration-teal/40 underline-offset-2 hover:decoration-teal">
               Surplus &amp; Shariah
             </a>
             .

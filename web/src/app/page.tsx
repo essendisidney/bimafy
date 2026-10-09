@@ -72,7 +72,7 @@ export default function Home() {
             <div className="mt-10 grid gap-px overflow-hidden rounded-2xl border border-line bg-line md:grid-cols-2 lg:grid-cols-3">
               {MOAT.map((m, i) => (
                 <div key={m.title} className="bg-paper p-6">
-                  <p className="font-display text-3xl text-gold">0{i + 1}</p>
+                  <p className="font-display text-3xl text-gold-ink">0{i + 1}</p>
                   <h3 className="mt-2 font-display text-2xl text-heading">{m.title}</h3>
                   <p className="mt-2 text-sm leading-relaxed text-mute">{m.body}</p>
                 </div>
