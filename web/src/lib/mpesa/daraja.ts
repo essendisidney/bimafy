@@ -51,15 +51,42 @@ function env(name: string, fallback = "") {
   return process.env[name] ?? fallback;
 }
 
+/**
+ * Where Safaricom posts the result. MPESA_CALLBACK_URL wins; otherwise the
+ * production URL Vercel provides. The shared secret is appended as ?token=
+ * so only Safaricom (who received the URL from us) can mark payments paid.
+ */
+export function mpesaCallbackUrl() {
+  const base =
+    env("MPESA_CALLBACK_URL") ||
+    (env("VERCEL_PROJECT_PRODUCTION_URL") ? `https://${env("VERCEL_PROJECT_PRODUCTION_URL")}/api/payments/mpesa/callback` : "");
+  const secret = env("MPESA_CALLBACK_SECRET");
+  if (!base || !secret) return "";
+  const url = new URL(base);
+  url.searchParams.set("token", secret);
+  return url.toString();
+}
+
 export function isMpesaLiveConfigured() {
   return Boolean(
     env("MPESA_CONSUMER_KEY") &&
       env("MPESA_CONSUMER_SECRET") &&
       env("MPESA_SHORTCODE") &&
       env("MPESA_PASSKEY") &&
-      env("MPESA_CALLBACK_URL"),
+      mpesaCallbackUrl(),
   );
 }
+
+/** Constant-time comparison of the callback ?token= against MPESA_CALLBACK_SECRET. */
+export function callbackTokenValid(token: string | null, secret = env("MPESA_CALLBACK_SECRET")) {
+  if (!token || !secret || token.length !== secret.length) return false;
+  let diff = 0;
+  for (let i = 0; i < secret.length; i++) diff |= token.charCodeAt(i) ^ secret.charCodeAt(i);
+  return diff === 0;
+}
+
+/** Largest single STK push we allow (Safaricom's per-transaction cap is KES 250,000). */
+export const MAX_STK_AMOUNT = 250_000;
 
 export function darajaBaseUrl() {
   return env("MPESA_ENV", "sandbox") === "production"
@@ -76,11 +103,13 @@ export function formatKenyanPhone(input: string) {
   throw new Error(`Invalid Kenyan phone: ${input}`);
 }
 
+/** Daraja wants Kenyan time (EAT, UTC+3) whatever timezone the server runs in. */
 export function stkTimestamp(date = new Date()) {
+  const eat = new Date(date.getTime() + 3 * 60 * 60 * 1000);
   const pad = (n: number) => String(n).padStart(2, "0");
   return (
-    `${date.getFullYear()}${pad(date.getMonth() + 1)}${pad(date.getDate())}` +
-    `${pad(date.getHours())}${pad(date.getMinutes())}${pad(date.getSeconds())}`
+    `${eat.getUTCFullYear()}${pad(eat.getUTCMonth() + 1)}${pad(eat.getUTCDate())}` +
+    `${pad(eat.getUTCHours())}${pad(eat.getUTCMinutes())}${pad(eat.getUTCSeconds())}`
   );
 }
 
@@ -117,9 +146,11 @@ export async function initiateStkPush(input: StkInitiateInput): Promise<StkIniti
   const phone = formatKenyanPhone(input.phone);
   const amount = Math.round(input.amount);
   if (!Number.isFinite(amount) || amount < 1) throw new Error("Amount must be at least KES 1");
+  if (amount > MAX_STK_AMOUNT) throw new Error(`M-Pesa can take at most KES ${MAX_STK_AMOUNT.toLocaleString("en-KE")} at once`);
 
   if (!isMpesaLiveConfigured()) {
-    const checkoutRequestId = `ws_CO_${Date.now()}`;
+    // Unguessable, like Safaricom's: the id is what lets someone look a payment up.
+    const checkoutRequestId = `ws_CO_SIM_${crypto.randomUUID().replaceAll("-", "")}`;
     return {
       mode: "sandbox_simulated",
       merchantRequestId: `sim-mr-${Date.now()}`,
@@ -134,7 +165,7 @@ export async function initiateStkPush(input: StkInitiateInput): Promise<StkIniti
 
   const shortcode = env("MPESA_SHORTCODE");
   const passkey = env("MPESA_PASSKEY");
-  const callbackUrl = env("MPESA_CALLBACK_URL");
+  const callbackUrl = mpesaCallbackUrl();
   const timestamp = stkTimestamp();
   const token = await getDarajaAccessToken();
 
@@ -205,4 +236,44 @@ export function parseStkCallback(body: StkCallbackBody): ParsedStkCallback {
     phone: get("PhoneNumber") != null ? String(get("PhoneNumber")) : undefined,
     transactionDate: get("TransactionDate") != null ? String(get("TransactionDate")) : undefined,
   };
+}
+
+export type StkQueryOutcome =
+  | { final: false }
+  | { final: true; success: boolean; resultCode: number; resultDesc: string };
+
+/** Read Daraja's STK Query reply: still waiting, or a final paid/failed answer. */
+export function interpretStkQuery(json: {
+  ResponseCode?: string;
+  ResultCode?: string | number;
+  ResultDesc?: string;
+  errorCode?: string;
+  errorMessage?: string;
+}): StkQueryOutcome {
+  // "500.001.1001: The transaction is being processed" — the customer hasn't answered yet.
+  if (json.errorCode) return { final: false };
+  if (json.ResultCode === undefined || json.ResultCode === null || json.ResultCode === "") return { final: false };
+  const resultCode = Number(json.ResultCode);
+  if (!Number.isFinite(resultCode)) return { final: false };
+  return { final: true, success: resultCode === 0, resultCode, resultDesc: json.ResultDesc ?? "" };
+}
+
+/** Ask Safaricom directly how an STK push ended — used when the callback is late or lost. */
+export async function queryStkPush(checkoutRequestId: string): Promise<StkQueryOutcome> {
+  if (!isMpesaLiveConfigured()) return { final: false };
+  const shortcode = env("MPESA_SHORTCODE");
+  const timestamp = stkTimestamp();
+  const token = await getDarajaAccessToken();
+  const res = await fetch(`${darajaBaseUrl()}/mpesa/stkpushquery/v1/query`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      BusinessShortCode: shortcode,
+      Password: stkPassword(shortcode, env("MPESA_PASSKEY"), timestamp),
+      Timestamp: timestamp,
+      CheckoutRequestID: checkoutRequestId,
+    }),
+    cache: "no-store",
+  });
+  return interpretStkQuery((await res.json().catch(() => ({}))) as Parameters<typeof interpretStkQuery>[0]);
 }
