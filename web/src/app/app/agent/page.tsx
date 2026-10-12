@@ -42,7 +42,7 @@ import {
 import { useLang, type Lang } from "@/lib/lang";
 import { createLead, distributorKey, logLeadActivity, newLeadId, ownsLead, pendingLeadWrites, useLeads } from "@/lib/leads";
 import { usePlatform } from "@/lib/store";
-import type { Lead, LeadActivity, LeadSource, LeadStatus, ProductLine } from "@/lib/types";
+import type { Agent, Lead, LeadActivity, LeadSource, LeadStatus, ProductLine } from "@/lib/types";
 import { LangToggle } from "@/components/lang-toggle";
 import { Badge, Button, Card, Empty, Field, PageHeader, SkeletonRows, Stat, Table, cn, inputClass } from "@/components/ui";
 
@@ -123,7 +123,19 @@ function AgentDesk() {
   const canSwitch = user?.role === "admin" || user?.role === "branch_manager";
   const [viewAgentId, setViewAgentId] = useState<string | null>(null);
   const agentKey = viewAgentId ?? user?.agentId;
-  const agent = agents.find((a) => a.id === agentKey || a.dbId === agentKey) ?? agents[0];
+  const rosterAgent = agents.find((a) => a.id === agentKey || a.dbId === agentKey);
+  // A real signed-in agent sees their own name and figures, never a demo agent's.
+  const ownProfile = mode === "supabase" && !viewAgentId && user?.agentId && user.agentProfile;
+  const agent: Agent = ownProfile
+    ? {
+        id: user.agentId!,
+        dbId: user.agentId,
+        name: user.name,
+        phone: user.phone,
+        branch: user.branch,
+        ...user.agentProfile!,
+      }
+    : (rosterAgent ?? agents[0]);
   // A signed-in agent always owns leads under their own agents.id, even if they aren't in the demo roster.
   const leadOwner = mode === "supabase" && !viewAgentId && user?.agentId ? user.agentId : distributorKey(agent);
   const [tab, setTab] = useState<Tab>("today");

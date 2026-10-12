@@ -64,7 +64,13 @@ type AuthContextValue = {
   loginAs: (userId: string) => void;
   loginWithPassword: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  /** Signed in with a one-time password from an admin: must pick their own first. */
+  mustChangePassword: boolean;
+  setNewPassword: (password: string) => Promise<void>;
 };
+
+type AuthUserLike = { user_metadata?: Record<string, unknown> | null };
+const needsNewPassword = (u?: AuthUserLike | null) => u?.user_metadata?.must_change_password === true;
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
@@ -84,7 +90,19 @@ async function profileToSession(userId: string): Promise<{ user: SessionUser; op
   if (error) throw error;
   const p = profile as ProfileRow | null;
   const { data: participant } = await supabase.from("participants").select("id").eq("profile_id", userId).maybeSingle();
-  const { data: agent } = await supabase.from("agents").select("id").eq("profile_id", userId).maybeSingle();
+  const { data: agent } = await supabase
+    .from("agents")
+    .select("id, agent_code, license_number, wallet_balance, ytd_gwp, sales_target")
+    .eq("profile_id", userId)
+    .maybeSingle();
+  const a = agent as {
+    id?: string;
+    agent_code?: string;
+    license_number?: string | null;
+    wallet_balance?: number | string | null;
+    ytd_gwp?: number | string | null;
+    sales_target?: number | string | null;
+  } | null;
   const { data: broker } = await supabase.from("brokers").select("id").eq("profile_id", userId).maybeSingle();
   const { data: branch } = p?.branch_id
     ? await supabase.from("branches").select("name").eq("id", p.branch_id).maybeSingle()
@@ -100,7 +118,16 @@ async function profileToSession(userId: string): Promise<{ user: SessionUser; op
       role: (p?.role as UserRole) ?? "participant",
       branch: (branch as { name?: string } | null)?.name ?? "Head office",
       participantId: (participant as { id?: string } | null)?.id,
-      agentId: (agent as { id?: string } | null)?.id,
+      agentId: a?.id,
+      agentProfile: a?.id
+        ? {
+            code: a.agent_code ?? "",
+            license: a.license_number ?? "",
+            wallet: Number(a.wallet_balance ?? 0),
+            ytdGwp: Number(a.ytd_gwp ?? 0),
+            target: Number(a.sales_target ?? 0),
+          }
+        : undefined,
       brokerId: (broker as { id?: string } | null)?.id,
     },
   };
@@ -113,6 +140,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     process.env.NEXT_PUBLIC_OPERATOR_ID ?? null,
   );
   const [ready, setReady] = useState(false);
+  const [mustChangePassword, setMustChangePassword] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -138,7 +166,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       };
       try {
         const { data, error } = await supabase.auth.getSession();
-        if (data.session?.user) apply(await resolveSession(data.session.user.id));
+        if (data.session?.user) {
+          apply(await resolveSession(data.session.user.id));
+          if (!cancelled) setMustChangePassword(needsNewPassword(data.session.user));
+        }
         // An expired token can't refresh with no signal: keep working as the last user.
         else if (error && isNetworkError(error)) {
           const cached = readOfflineSession();
@@ -156,9 +187,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           if (event === "SIGNED_OUT") {
             localStorage.removeItem(OFFLINE_KEY);
             setUser(null);
+            setMustChangePassword(false);
           }
           return;
         }
+        setMustChangePassword(needsNewPassword(session.user));
         try {
           apply(await resolveSession(session.user.id));
         } catch {
@@ -193,6 +226,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (error) throw error;
     if (!data.user) throw new Error("No user returned");
     const mapped = await resolveSession(data.user.id);
+    setMustChangePassword(needsNewPassword(data.user));
     setUser(mapped.user);
     setOperatorId(mapped.operatorId ?? process.env.NEXT_PUBLIC_OPERATOR_ID ?? null);
   }, []);
@@ -205,11 +239,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem(KEY);
     localStorage.removeItem(OFFLINE_KEY);
     setUser(null);
+    setMustChangePassword(false);
   }, [mode]);
 
+  const setNewPassword = useCallback(async (password: string) => {
+    const supabase = await supabaseClient();
+    const { error } = await supabase.auth.updateUser({ password, data: { must_change_password: false } });
+    if (error) throw error;
+    setMustChangePassword(false);
+  }, []);
+
   const value = useMemo<AuthContextValue>(
-    () => ({ user, ready, mode, operatorId, login, loginAs, loginWithPassword, logout }),
-    [user, ready, mode, operatorId, login, loginAs, loginWithPassword, logout],
+    () => ({ user, ready, mode, operatorId, login, loginAs, loginWithPassword, logout, mustChangePassword, setNewPassword }),
+    [user, ready, mode, operatorId, login, loginAs, loginWithPassword, logout, mustChangePassword, setNewPassword],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
