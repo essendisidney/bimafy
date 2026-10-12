@@ -10,6 +10,7 @@ import { primaryNav, visibleNav, type NavItem } from "@/lib/nav";
 import { setFlag, useFlag } from "@/lib/prefs";
 import { CommandPalette } from "./command-palette";
 import { Logo } from "./logo";
+import { SetPasswordScreen } from "./set-password";
 import { InstallButton, SyncStatus, WarmCurrentPage } from "./pwa";
 import { ThemeToggle } from "./theme-toggle";
 import { NAV_ICONS } from "./nav-icons";
@@ -32,7 +33,7 @@ function isActive(pathname: string, href: string) {
 }
 
 export function AppShell({ children }: { children: React.ReactNode }) {
-  const { user, ready, logout } = useAuth();
+  const { user, ready, logout, mustChangePassword } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -73,6 +74,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   if (!ready || !user) {
     return <div className="grid min-h-screen place-items-center atmosphere text-mute">Loading Bimafy desk…</div>;
   }
+  if (mustChangePassword) return <SetPasswordScreen />;
 
   const current = items.filter((i) => isActive(pathname, i.href)).sort((a, b) => b.href.length - a.href.length)[0];
 

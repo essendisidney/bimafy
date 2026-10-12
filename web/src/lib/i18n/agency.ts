@@ -152,7 +152,7 @@ const en: Dict = {
   eyebrow: "Bimafy Agent",
   title: (first) => `${first}'s desk`,
   description: (code, branch, license) =>
-    `${code} · ${branch} · ${license}. Your day, your pipeline, your renewals and your money — in one place.`,
+    `${[code, branch, license].filter(Boolean).join(" · ")}. Your day, your pipeline, your renewals and your money — in one place.`,
   viewAgent: "View agent",
   newQuote: "New quotation",
   stats: {
@@ -369,7 +369,7 @@ const sw: Dict = {
   eyebrow: "Wakala wa Bimafy",
   title: (first) => `Dawati la ${first}`,
   description: (code, branch, license) =>
-    `${code} · ${branch} · ${license}. Siku yako, wateja wako, bima za kuhuisha na pesa zako — mahali pamoja.`,
+    `${[code, branch, license].filter(Boolean).join(" · ")}. Siku yako, wateja wako, bima za kuhuisha na pesa zako — mahali pamoja.`,
   viewAgent: "Angalia wakala",
   newQuote: "Bei mpya",
   stats: {

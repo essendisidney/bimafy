@@ -98,6 +98,8 @@ export type SessionUser = {
   branch: string;
   participantId?: string;
   agentId?: string;
+  /** The signed-in agent's own record (real accounts), so the desk never shows a demo agent's figures. */
+  agentProfile?: { code: string; license: string; wallet: number; ytdGwp: number; target: number };
   brokerId?: string;
 };
 
