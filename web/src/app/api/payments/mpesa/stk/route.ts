@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { initiateStkPush } from "@/lib/mpesa/daraja";
-import { savePendingStk, simulateSuccessfulCallback } from "@/lib/mpesa/pending";
+import { savePendingStk } from "@/lib/mpesa/pending";
 
 export async function POST(request: Request) {
   try {
@@ -16,10 +16,7 @@ export async function POST(request: Request) {
     };
 
     if (!body.phone || !body.amount || !body.accountReference) {
-      return NextResponse.json(
-        { error: "phone, amount and accountReference are required" },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: "phone, amount and accountReference are required" }, { status: 400 });
     }
 
     const result = await initiateStkPush({
@@ -29,23 +26,24 @@ export async function POST(request: Request) {
       description: body.description,
     });
 
-    const pending = savePendingStk(result, {
+    const pending = await savePendingStk(result, {
       policyId: body.policyId,
       policyNumber: body.policyNumber,
-      participantName: body.participantName,
+      participantName: body.participantName?.slice(0, 120),
       participantId: body.participantId,
     });
 
-    // Without Daraja credentials, auto-reconcile after ~8s so the desk stays demoable.
-    if (result.mode === "sandbox_simulated") {
-      setTimeout(() => simulateSuccessfulCallback(result.checkoutRequestId), 8_000);
-    }
-
-    return NextResponse.json({ ok: true, ...result, pending });
+    return NextResponse.json({
+      ok: true,
+      mode: result.mode,
+      checkoutRequestId: result.checkoutRequestId,
+      customerMessage: result.customerMessage,
+      pending,
+    });
   } catch (err) {
-    return NextResponse.json(
-      { error: err instanceof Error ? err.message : "STK initiation failed" },
-      { status: 500 },
-    );
+    const message = err instanceof Error ? err.message : "STK initiation failed";
+    // Bad input (phone, amount) is the caller's to fix; anything else is ours.
+    const status = /phone|amount|KES/i.test(message) ? 400 : 502;
+    return NextResponse.json({ error: message }, { status });
   }
 }
