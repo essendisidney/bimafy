@@ -61,6 +61,7 @@ const STAFF_CARE: UserRole[] = ["call_center", "admin", "branch_manager", "agent
 
 export const navItems: NavItem[] = [
   { href: "/app/dashboard", label: "Home", roles: "*", section: "Overview", icon: "home" },
+  { href: "/app/owner", label: "Business", roles: ["admin", "branch_manager", "finance"], section: "Overview", icon: "analytics" },
   { href: "/app/modules", label: "Platform", roles: "*", section: "Overview", icon: "platform" },
 
   { href: "/app/agent", label: "Agency", roles: STAFF_AGENT, section: "Sell", icon: "agency" },
@@ -90,7 +91,7 @@ export const navItems: NavItem[] = [
   { href: "/app/ai", label: "Intelligence", roles: STAFF_AI, section: "Insight & control", icon: "ai" },
   { href: "/app/compliance", label: "Regulatory", roles: ["compliance", "admin", "shariah_officer"], section: "Insight & control", icon: "regulatory" },
   { href: "/app/integrations", label: "APIs & partners", roles: STAFF_CONNECT, section: "Insight & control", icon: "apis" },
-  { href: "/app/team", label: "Agents & logins", roles: ["admin", "branch_manager"], section: "Insight & control", icon: "agency" },
+  { href: "/app/team", label: "Agents", roles: ["admin", "branch_manager"], section: "Insight & control", icon: "agency" },
   { href: "/app/admin", label: "Administration", roles: ["admin"], section: "Insight & control", icon: "admin" },
 ];
 
@@ -110,7 +111,8 @@ const PRIMARY: Partial<Record<UserRole, string[]>> = {
   compliance: ["/app/dashboard", "/app/compliance", "/app/fraud", "/app/claims"],
   shariah_officer: ["/app/dashboard", "/app/shariah", "/app/compliance", "/app/analytics"],
   call_center: ["/app/dashboard", "/app/crm", "/app/claims", "/app/policies"],
-  branch_manager: ["/app/dashboard", "/app/agent", "/app/policies", "/app/analytics"],
+  branch_manager: ["/app/dashboard", "/app/owner", "/app/agent", "/app/team"],
+  admin: ["/app/dashboard", "/app/owner", "/app/policies", "/app/team"],
 };
 const DEFAULT_PRIMARY = ["/app/dashboard", "/app/policies", "/app/claims", "/app/analytics"];
 
