@@ -1,6 +1,6 @@
 import type { Reminder, ReminderKind } from "../engines/reminders";
 import type { Lang } from "../lang";
-import { formatDay } from "./agency";
+import { formatDay } from "./agency.ts";
 
 /**
  * Client reminder texts, kept short enough for a 2-part SMS (≤ 306 chars).
@@ -27,24 +27,24 @@ export function reminderMessage(lang: Lang, r: Reminder, agent: string) {
     const sw: Record<ReminderKind, string> = {
       renewal_30: `Habari ${first}, ni ${agent} wa Bimafy. Bima yako ya ${product} (${no}) inaisha ${date}. Unaweza kulipa ${amount} mara moja au kwa awamu kupitia M-Pesa. Jibu NDIYO nikusaidie.`,
       renewal_7: `Habari ${first}, bima yako ya ${product} (${no}) inaisha baada ya siku 7 (${date}). Jibu NDIYO nikutumie ombi la M-Pesa la ${amount} au tupange awamu.`,
-      renewal_1: `${first}, bima yako ya ${product} (${no}) inaisha KESHO. Usibaki bila kinga — jibu NDIYO nikutumie ombi la M-Pesa sasa. ${agent}, Bimafy.`,
+      renewal_1: `${first}, bima yako ya ${product} (${no}) inaisha KESHO. Usibaki bila kinga, jibu NDIYO nikutumie ombi la M-Pesa sasa. ${agent}, Bimafy.`,
       renewal_lapsed: `Habari ${first}, bima yako ya ${product} (${no}) iliisha ${date} na kwa sasa huna kinga. Jibu NDIYO niihuishe leo kupitia M-Pesa. ${agent}, Bimafy.`,
       instalment_soon: `Habari ${first}, ukumbusho: ${which} ya bima yako ${no} (${amount}) inalipwa ${date}. Jibu NDIYO nikutumie ombi la M-Pesa siku hiyo. ${agent}, Bimafy.`,
       instalment_today: `Habari ${first}, ${which} ya bima yako ${no} (${amount}) inalipwa leo. Jibu NDIYO nikutumie ombi la M-Pesa sasa. Asante! ${agent}, Bimafy.`,
       instalment_late: `Habari ${first}, hatujapokea ${which} ya bima yako ${no} iliyopaswa ${date}. Kiasi kinachodaiwa ni ${amount}. Jibu NDIYO nikutumie ombi la M-Pesa. ${agent}, Bimafy.`,
-      instalment_final: `${first}, bima yako ${no} inaweza kusimamishwa kwa sababu ya malipo ya ${amount} yaliyochelewa. Lipa leo ili uendelee kulindwa — jibu NDIYO. ${agent}, Bimafy.`,
+      instalment_final: `${first}, bima yako ${no} inaweza kusimamishwa kwa sababu ya malipo ya ${amount} yaliyochelewa. Lipa leo ili uendelee kulindwa, jibu NDIYO. ${agent}, Bimafy.`,
     };
     return sw[r.kind];
   }
   const en: Record<ReminderKind, string> = {
     renewal_30: `Hi ${first}, it's ${agent} from Bimafy. Your ${product} cover (${no}) renews on ${date}. You can pay ${amount} at once or in instalments by M-Pesa. Reply YES and I'll set it up.`,
     renewal_7: `Hi ${first}, your ${product} cover (${no}) ends in 7 days (${date}). Reply YES for an M-Pesa request of ${amount}, or ask me about paying in instalments.`,
-    renewal_1: `${first}, your ${product} cover (${no}) ends TOMORROW. Don't drive or work uncovered — reply YES and I'll send the M-Pesa request now. ${agent}, Bimafy.`,
+    renewal_1: `${first}, your ${product} cover (${no}) ends TOMORROW. Don't drive or work uncovered, reply YES and I'll send the M-Pesa request now. ${agent}, Bimafy.`,
     renewal_lapsed: `Hi ${first}, your ${product} cover (${no}) ended on ${date}, so you're not covered right now. Reply YES and I'll renew it today by M-Pesa. ${agent}, Bimafy.`,
     instalment_soon: `Hi ${first}, a reminder that your ${which} for policy ${no} (${amount}) is due on ${date}. Reply YES and I'll send the M-Pesa request that day. ${agent}, Bimafy.`,
     instalment_today: `Hi ${first}, your ${which} for policy ${no} (${amount}) is due today. Reply YES and I'll send the M-Pesa request now. Thank you! ${agent}, Bimafy.`,
     instalment_late: `Hi ${first}, we haven't received your ${which} for policy ${no}, due ${date}. Amount owed: ${amount}. Reply YES and I'll send an M-Pesa request. ${agent}, Bimafy.`,
-    instalment_final: `${first}, your policy ${no} may be suspended because ${amount} is overdue. Pay today to stay covered — reply YES for an M-Pesa request. ${agent}, Bimafy.`,
+    instalment_final: `${first}, your policy ${no} may be suspended because ${amount} is overdue. Pay today to stay covered, reply YES for an M-Pesa request. ${agent}, Bimafy.`,
   };
   return en[r.kind];
 }

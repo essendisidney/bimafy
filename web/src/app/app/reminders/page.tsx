@@ -65,8 +65,8 @@ export default function RemindersPage() {
   const behind = plans.filter((p) => p.status.health === "behind" || p.status.health === "at_risk");
   const overdue = plans.reduce((s, p) => s + p.status.overdueAmount, 0);
 
-  function record(r: Reminder, channel: "sms" | "whatsapp") {
-    markReminderSent(r.key, channel);
+  function record(r: Reminder, channel: "sms" | "whatsapp", messageId?: string) {
+    void markReminderSent(r.key, channel, { policyId: r.policy.id, kind: r.kind, messageId });
     pushNotification({
       channel,
       title: `Reminder · ${r.policy.participantName}`,
@@ -81,9 +81,9 @@ export default function RemindersPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ phone: phone(r), message: text(r) }),
     });
-    const json = (await res.json().catch(() => ({}))) as { error?: string; mode?: string };
+    const json = (await res.json().catch(() => ({}))) as { error?: string; mode?: string; messageId?: string };
     if (!res.ok) throw new Error(json.error ?? "SMS failed");
-    record(r, "sms");
+    record(r, "sms", json.messageId);
     return json.mode ?? null;
   }
 
@@ -132,7 +132,7 @@ export default function RemindersPage() {
       <PageHeader
         eyebrow="Reminders"
         title="Who to message today"
-        description="Renewal and instalment reminders worked out every morning, so no client lapses because nobody reminded them."
+        description="Renewal and instalment reminders worked out every morning, so no client lapses because nobody reminded them. When auto-send is on, these go out by SMS at 8am."
         actions={
           <div className="flex flex-wrap items-center gap-2">
             <LangToggle value={lang} onChange={setLang} />
@@ -202,7 +202,7 @@ export default function RemindersPage() {
                   <span className="text-mute"> · {reminderReason(r, today)}</span>
                 </span>
                 <span className="text-xs text-mute">
-                  ✓ {log[r.key]?.channel === "whatsapp" ? "WhatsApp" : "SMS"} ·{" "}
+                  ✓ {log[r.key]?.automatic ? "Auto SMS" : log[r.key]?.channel === "whatsapp" ? "WhatsApp" : "SMS"} ·{" "}
                   {log[r.key] ? new Date(log[r.key].at).toLocaleTimeString("en-KE", { hour: "2-digit", minute: "2-digit" }) : ""}
                 </span>
               </li>
