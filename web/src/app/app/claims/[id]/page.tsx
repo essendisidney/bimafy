@@ -9,6 +9,7 @@ import { money } from "@/lib/format";
 import { demoUsers } from "@/lib/seed";
 import { platformStore, usePlatform } from "@/lib/store";
 import type { Claim, ClaimStatus, UserRole } from "@/lib/types";
+import { ClaimPhotos } from "@/components/claim-photos";
 import { Badge, Button, Card, DetailSkeleton, Empty, Field, PageHeader, inputClass } from "@/components/ui";
 import { useState } from "react";
 import Link from "next/link";
@@ -69,6 +70,14 @@ export default function ClaimDetailPage() {
   async function patch(next: Partial<Claim>) {
     await updateClaimRemote(claim!.id, next);
     refresh();
+    // Record the step and text the customer where it matters (once per step).
+    if (next.status) {
+      void fetch("/api/claims/notify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ claimId: claim!.id, status: next.status }),
+      }).catch(() => null);
+    }
   }
 
   function attachEvidence() {
@@ -342,6 +351,9 @@ export default function ClaimDetailPage() {
             </Link>
           </p>
         </Card>
+      </div>
+      <div className="mt-4">
+        <ClaimPhotos claimId={claim.id} />
       </div>
     </div>
   );

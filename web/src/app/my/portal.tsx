@@ -1,13 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { FileDown, LogOut, MessageCircle, ShieldCheck, Wallet } from "lucide-react";
+import { Camera, FileDown, LogOut, MessageCircle, ShieldCheck, Wallet } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { PublicHeader } from "@/components/public/public-header";
 import { Badge, cn, inputClass } from "@/components/ui";
 import { buildPolicyCertificateHtml, downloadTextFile } from "@/lib/documents/certificate";
 import { whatsappLink } from "@/lib/engines/agency";
 import { money } from "@/lib/format";
+import { shrinkPhoto } from "@/lib/image";
+import { createClient } from "@/lib/supabase/client";
 import { portalPolicyToPolicy, type PortalData, type PortalPolicy } from "@/lib/portal";
 
 const KEY = "bimafy.portal";
@@ -298,16 +300,9 @@ function Dashboard({ data, token, reload, onSignOut }: { data: PortalData; token
       {data.claims.length ? (
         <>
           <h2 className="mt-8 font-display text-2xl">Your claims</h2>
-          <ul className="mt-3 space-y-2">
+          <ul className="mt-3 space-y-3">
             {data.claims.map((c) => (
-              <li key={c.number} className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-line bg-surface px-4 py-3 text-sm">
-                <span>
-                  <span className="font-medium">{c.number}</span>
-                  <span className="text-mute"> · {c.policy_number} · {day(c.reported_at)}</span>
-                  {c.claimed ? <span className="text-mute"> · {money(Number(c.claimed))}</span> : null}
-                </span>
-                <Badge status={c.status} />
-              </li>
+              <ClaimCard key={c.number} claim={c} token={token} onChanged={reload} />
             ))}
           </ul>
         </>
@@ -330,6 +325,118 @@ function Dashboard({ data, token, reload, onSignOut }: { data: PortalData; token
         </>
       ) : null}
     </div>
+  );
+}
+
+const STEP_LABEL: Record<string, string> = {
+  reported: "Received",
+  documents_pending: "We need photos or documents",
+  under_review: "Being reviewed",
+  fraud_check: "Being checked",
+  assigned: "Assessor assigned",
+  assessing: "Being assessed",
+  estimated: "Estimate done",
+  pending_approval: "Waiting for approval",
+  approved: "Approved",
+  paid: "Paid",
+  rejected: "Not approved",
+  closed: "Closed",
+};
+
+function ClaimCard({ claim, token, onChanged }: { claim: PortalData["claims"][number]; token: string; onChanged: () => void }) {
+  const [busy, setBusy] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [added, setAdded] = useState(0);
+  const open = !["paid", "closed", "rejected"].includes(claim.status);
+  const photos = (claim.photos ?? 0) + added;
+  const steps = [{ status: "reported", at: claim.reported_at }, ...(claim.steps ?? []).filter((s) => s.status !== "reported")];
+
+  async function addPhotos(files: FileList | null) {
+    if (!files?.length) return;
+    setError(null);
+    const list = Array.from(files).slice(0, 8);
+    let done = 0;
+    for (const file of list) {
+      setBusy(`Uploading ${done + 1} of ${list.length}…`);
+      try {
+        const { blob, ext } = await shrinkPhoto(file);
+        if (blob.size > 5 * 1024 * 1024) throw new Error("That photo is too large (over 5MB)");
+        const slot = await call<{ path: string; demo?: boolean }>("/api/portal/photo", {
+          method: "POST",
+          token,
+          body: JSON.stringify({ claimNumber: claim.number, ext }),
+        });
+        if (!slot.demo) {
+          const { error: upErr } = await createClient()
+            .storage.from("claim-photos")
+            .upload(slot.path, blob, { contentType: ext === "jpg" ? "image/jpeg" : `image/${ext}`, upsert: false });
+          if (upErr) throw new Error("The upload didn't go through — check your connection and try again");
+        }
+        await call("/api/portal/photo", { method: "PUT", token, body: JSON.stringify({ claimNumber: claim.number, path: slot.path }) });
+        done++;
+        setAdded((n) => n + 1);
+      } catch (err) {
+        setError((err as Error).message);
+        break;
+      }
+    }
+    setBusy(null);
+    if (done) onChanged();
+  }
+
+  return (
+    <li className="rounded-2xl border border-line bg-surface p-4">
+      <div className="flex flex-wrap items-start justify-between gap-2">
+        <div>
+          <p className="font-medium text-heading">{claim.number}</p>
+          <p className="text-xs text-mute">
+            {claim.policy_number} · happened {day(claim.incident_date)}
+            {claim.claimed ? ` · ${money(Number(claim.claimed))}` : ""}
+          </p>
+        </div>
+        <Badge status={claim.status} label={STEP_LABEL[claim.status]} />
+      </div>
+      {claim.status === "documents_pending" ? (
+        <p className="mt-3 rounded-xl border border-gold/30 bg-gold/15 px-3 py-2 text-sm text-gold-ink">
+          We need photos or documents to continue — add them below.
+        </p>
+      ) : null}
+      {claim.status === "approved" && claim.approved ? (
+        <p className="mt-3 rounded-xl border border-teal/25 bg-teal/10 px-3 py-2 text-sm text-teal-ink">
+          Approved for {money(Number(claim.approved))}. Payment is on its way.
+        </p>
+      ) : null}
+      <ol className="mt-3 space-y-1.5 border-l-2 border-line pl-4 text-sm">
+        {steps.map((s) => (
+          <li key={s.status} className="relative">
+            <span aria-hidden className="absolute -left-[1.4rem] top-1.5 size-2.5 rounded-full bg-teal" />
+            <span className="font-medium">{STEP_LABEL[s.status] ?? s.status}</span>
+            <span className="text-mute"> · {day(s.at)}</span>
+          </li>
+        ))}
+      </ol>
+      <div className="mt-3 flex flex-wrap items-center gap-3">
+        <span className="text-xs text-mute">{photos ? `${photos} photo${photos === 1 ? "" : "s"} added` : "No photos yet"}</span>
+        {open ? (
+          <label className={cn("inline-flex cursor-pointer items-center gap-1.5 rounded-xl border border-line px-3 py-2 text-sm hover:border-teal", busy && "pointer-events-none opacity-60")}>
+            <Camera className="size-4" aria-hidden />
+            {busy ?? "Add photos"}
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              capture="environment"
+              multiple
+              className="sr-only"
+              onChange={(e) => {
+                void addPhotos(e.target.files);
+                e.target.value = "";
+              }}
+            />
+          </label>
+        ) : null}
+      </div>
+      {error ? <div className="mt-2"><Alert>{error}</Alert></div> : null}
+    </li>
   );
 }
 

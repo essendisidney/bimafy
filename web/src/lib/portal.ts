@@ -34,6 +34,10 @@ export type PortalData = {
     claimed: number | null;
     approved: number | null;
     description: string | null;
+    /** Photos the customer has added (migration 00019). */
+    photos?: number;
+    /** Steps staff recorded, oldest first. */
+    steps?: { status: string; at: string }[];
   }[];
 };
 
@@ -84,6 +88,8 @@ export function demoPortal(): PortalData {
         claimed: c.claimed,
         approved: c.approved ?? null,
         description: c.description,
+        photos: 0,
+        steps: [],
       })),
   };
 }
