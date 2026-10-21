@@ -53,6 +53,11 @@ This repo ships a working **Next.js console** (`web/`), a **Postgres/Supabase sc
   counties on their Profile page); `/agents/<slug>` shows their rating and reviews and sends quote
   requests to that agent. Reviews come only through one-time invites: created when a pay link is paid,
   or by staff ("Ask for a review" on a policy). `supabase/migrations/00017_agent_profiles.sql`.
+- **Customer self-service (`/my`):** customers sign in with their phone number and a 6-digit SMS code
+  (no password), then see their policies, payments and claims, download certificates, pay by M-Pesa
+  (a pay link for the amount the database decides) and report claims (their agent gets an SMS).
+  Codes are issued only by the server with `CRON_SECRET`; the database keeps only hashes of codes and
+  30-day session tokens (`supabase/migrations/00018_customer_portal.sql`).
 - **Channels:** WhatsApp + USSD webhooks
 - **Embed:** Partner API `/api/v1`
 
