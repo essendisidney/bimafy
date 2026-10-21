@@ -58,6 +58,11 @@ This repo ships a working **Next.js console** (`web/`), a **Postgres/Supabase sc
   (a pay link for the amount the database decides) and report claims (their agent gets an SMS).
   Codes are issued only by the server with `CRON_SECRET`; the database keeps only hashes of codes and
   30-day session tokens (`supabase/migrations/00018_customer_portal.sql`).
+- **Claim journey:** customers add photos to a claim from `/my` (shrunk on the phone, uploaded straight
+  to the private `claim-photos` bucket into a single-use slot); staff see them on the claim page via
+  short-lived links. When staff move a claim to documents pending, assessor assigned, approved, paid or
+  rejected, the customer gets one SMS per step (`public.claim_step`, migration 00019) and sees the step
+  timeline on `/my`.
 - **Channels:** WhatsApp + USSD webhooks
 - **Embed:** Partner API `/api/v1`
 
