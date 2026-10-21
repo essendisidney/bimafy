@@ -450,15 +450,16 @@ export async function updatePolicyRemote(id: string, patch: Partial<Policy>) {
   if (patch.contribution != null) payload.contribution = patch.contribution;
   if (patch.wakala != null) payload.wakala_fee = patch.wakala;
   if (patch.tabarru != null) payload.tabarru = patch.tabarru;
-  if (patch.history !== undefined || "pendingEndorsement" in patch) {
-    let history = patch.history;
-    if (history === undefined) {
-      const { data } = await sb().from("policies").select("risk_payload").eq("id", id).maybeSingle();
-      history = ((data?.risk_payload as { history?: Policy["history"] } | null)?.history ?? []) as Policy["history"];
-    }
+  if (patch.history !== undefined || "pendingEndorsement" in patch || "instalmentPlan" in patch) {
+    // risk_payload holds several independent fields; merge so one change doesn't wipe the others.
+    const { data } = await sb().from("policies").select("risk_payload").eq("id", id).maybeSingle();
+    const current = (data?.risk_payload ?? {}) as Record<string, unknown>;
     payload.risk_payload = {
-      history: history ?? [],
-      pendingEndorsement: patch.pendingEndorsement ?? null,
+      ...current,
+      history: patch.history ?? current.history ?? [],
+      pendingEndorsement:
+        "pendingEndorsement" in patch ? (patch.pendingEndorsement ?? null) : (current.pendingEndorsement ?? null),
+      instalmentPlan: "instalmentPlan" in patch ? (patch.instalmentPlan ?? null) : (current.instalmentPlan ?? null),
     };
   }
   payload.updated_at = new Date().toISOString();

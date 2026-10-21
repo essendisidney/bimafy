@@ -234,6 +234,21 @@ export type Policy = {
     tabarru: number;
     requestedAt: string;
   };
+  /** "Lipa pole pole": the premium split into a deposit plus scheduled M-Pesa instalments. */
+  instalmentPlan?: InstalmentPlan;
+};
+
+export type InstalmentPlan = {
+  /** Whole premium being spread (KES). */
+  total: number;
+  /** Paid up front, due the day the plan is set up (0 for none). */
+  deposit: number;
+  /** Number of instalments after the deposit. */
+  count: number;
+  every: "weekly" | "monthly";
+  /** YYYY-MM-DD of the first instalment after the deposit. */
+  firstDue: string;
+  createdAt: string;
 };
 
 export type Claim = {
