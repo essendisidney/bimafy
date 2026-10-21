@@ -1,6 +1,6 @@
 import type { Frequency, Product, Quote, UwDecision } from "../types";
-import { applyLevies, frequencyFactor, splitContribution, toMonthly } from "./takaful";
-import { underwrite, type UwInput } from "./underwriting";
+import { applyLevies, frequencyFactor, splitContribution, toMonthly } from "./takaful.ts";
+import { underwrite, type UwInput } from "./underwriting.ts";
 
 export type QuoteRequest = {
   product: Product;
