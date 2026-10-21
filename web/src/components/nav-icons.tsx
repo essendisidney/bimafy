@@ -24,6 +24,7 @@ import {
   Users,
   Wallet,
   Bell,
+  BellRing,
   type LucideIcon,
 } from "lucide-react";
 import type { NavIcon } from "@/lib/nav";
@@ -52,6 +53,7 @@ export const NAV_ICONS: Record<NavIcon, LucideIcon> = {
   selfService: UserRound,
   crm: Headset,
   notifications: Bell,
+  reminders: BellRing,
   profile: IdCard,
   admin: Settings,
 };

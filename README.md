@@ -33,6 +33,10 @@ This repo ships a working **Next.js console** (`web/`), a **Postgres/Supabase sc
     `mpesa_*` functions; the callback must carry `?token=$MPESA_CALLBACK_SECRET`, and late or lost
     callbacks are recovered with Daraja's STK Query. Rotate the secret with:
     `insert into private.app_secrets (name, sha256) values ('mpesa_callback', encode(extensions.digest('<secret>', 'sha256'), 'hex')) on conflict (name) do update set sha256 = excluded.sha256;`
+- **Reminders & instalments:** `/app/reminders` lists who to message each day — renewals at 30, 7 and
+  1 days before expiry (and a win-back 3 days after), and "lipa pole pole" instalments 3 days before,
+  on the day, 3 and 10 days late. SMS goes through Africa's Talking (`AFRICASTALKING_*`, signed-in
+  staff only); without keys it runs in test mode. Plans live in `policies.risk_payload.instalmentPlan`.
 - **Channels:** WhatsApp + USSD webhooks
 - **Embed:** Partner API `/api/v1`
 

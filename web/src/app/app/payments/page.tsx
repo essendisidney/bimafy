@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth";
 import { applyPolicyLifecycle, pushNotification, recordContribution } from "@/lib/events/ledger";
 import { money } from "@/lib/format";
-import { updatePolicyRemote, usePaymentsBook, usePoliciesBook } from "@/lib/data";
-import { participants } from "@/lib/seed";
+import { updatePolicyRemote, useParticipants, usePaymentsBook, usePoliciesBook } from "@/lib/data";
 import type { PaymentMethod } from "@/lib/types";
 import { Badge, Button, Card, Field, PageHeader, Table, inputClass } from "@/components/ui";
 
@@ -37,7 +37,18 @@ type StkPending = {
 };
 
 export default function PaymentsPage() {
+  return (
+    <Suspense>
+      <PaymentsDesk />
+    </Suspense>
+  );
+}
+
+function PaymentsDesk() {
   const { user } = useAuth();
+  // ?policy=<id>&amount=<KES> pre-fills a collection (from Reminders or an instalment plan).
+  const params = useSearchParams();
+  const { participants } = useParticipants();
   const { policies, refresh: refreshPolicies } = usePoliciesBook();
   const { payments, refresh: refreshPayments } = usePaymentsBook();
   const book = useMemo(() => {
@@ -56,10 +67,13 @@ export default function PaymentsPage() {
     }
     return payments;
   }, [payments, book, user]);
-  const [pickedPolicyId, setPickedPolicyId] = useState("");
+  const [pickedPolicyId, setPickedPolicyId] = useState(() => params.get("policy") ?? "");
   const [method, setMethod] = useState<PaymentMethod>("mpesa_stk");
   // Edits the user typed; null means "use the selected policy's own values".
-  const [amountEdit, setAmount] = useState<number | null>(null);
+  const [amountEdit, setAmount] = useState<number | null>(() => {
+    const asked = Number(params.get("amount"));
+    return Number.isFinite(asked) && asked > 0 ? Math.round(asked) : null;
+  });
   const [phoneEdit, setPhone] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -71,7 +85,7 @@ export default function PaymentsPage() {
   const selectedPolicy = book.find((p) => p.id === policyId);
   const amount = amountEdit ?? selectedPolicy?.contribution ?? 200;
   const phone =
-    phoneEdit ?? participants.find((p) => p.id === selectedPolicy?.participantId)?.phone ?? "+254711000111";
+    phoneEdit ?? participants.find((p) => p.id === selectedPolicy?.participantId)?.phone ?? "";
 
   function choosePolicy(id: string) {
     setPickedPolicyId(id);

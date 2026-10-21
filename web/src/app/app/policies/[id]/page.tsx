@@ -7,6 +7,7 @@ import { updatePolicyRemote, usePaymentsBook, usePoliciesBook } from "@/lib/data
 import { applyPolicyLifecycle, issuePolicyCertificate, type PolicyLifecycleAction } from "@/lib/events/ledger";
 import { money } from "@/lib/format";
 import type { PolicyStatus } from "@/lib/types";
+import { InstalmentPlanCard } from "@/components/instalment-plan";
 import { Badge, Button, Card, DetailSkeleton, Empty, PageHeader } from "@/components/ui";
 
 const transitions: { label: string; action: PolicyLifecycleAction; status: PolicyStatus }[] = [
@@ -139,6 +140,18 @@ export default function PolicyDetailPage() {
           </Button>
         </Card>
       </div>
+      {(policy.frequency === "annually" || policy.frequency === "quarterly") && policy.status !== "cancelled" ? (
+        <div className="mt-4 lg:max-w-[66%]">
+          <InstalmentPlanCard
+            policy={policy}
+            payments={payments}
+            onSave={async (plan) => {
+              await updatePolicyRemote(policy.id, { instalmentPlan: plan ?? undefined });
+              refresh();
+            }}
+          />
+        </div>
+      ) : null}
     </div>
   );
 }

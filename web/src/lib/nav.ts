@@ -24,6 +24,7 @@ export type NavIcon =
   | "selfService"
   | "crm"
   | "notifications"
+  | "reminders"
   | "profile"
   | "admin";
 
@@ -68,6 +69,7 @@ export const navItems: NavItem[] = [
   { href: "/app/broker", label: "Broker", roles: ["broker", "admin"], section: "Sell", icon: "broker" },
   { href: "/app/quotes", label: "Quotations", roles: "*", section: "Sell", icon: "quotes" },
   { href: "/app/products", label: "Products", roles: "*", section: "Sell", icon: "products" },
+  { href: "/app/reminders", label: "Reminders", roles: ["agent", "admin", "branch_manager", "call_center", "finance"], section: "Sell", icon: "reminders" },
   { href: "/app/crm", label: "CRM & care", roles: STAFF_CARE, section: "Sell", icon: "crm" },
 
   { href: "/app/policies", label: "Policies", roles: "*", section: "Policies", icon: "policies" },
@@ -102,7 +104,7 @@ export function visibleNav(role: UserRole) {
 /** The four places each role lives in — the phone tab bar. Everything else is under "More". */
 const PRIMARY: Partial<Record<UserRole, string[]>> = {
   participant: ["/app/dashboard", "/app/customer", "/app/claims", "/app/profile"],
-  agent: ["/app/dashboard", "/app/agent", "/app/quotes", "/app/policies"],
+  agent: ["/app/dashboard", "/app/agent", "/app/reminders", "/app/policies"],
   broker: ["/app/dashboard", "/app/broker", "/app/quotes", "/app/policies"],
   underwriter: ["/app/dashboard", "/app/underwriting", "/app/quotes", "/app/policies"],
   claims_officer: ["/app/dashboard", "/app/claims", "/app/fraud", "/app/policies"],

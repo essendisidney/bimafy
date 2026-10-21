@@ -195,6 +195,7 @@ export function mapPolicy(
   const pas = (row.risk_payload ?? {}) as {
     history?: PolicyEndorsement[];
     pendingEndorsement?: Policy["pendingEndorsement"];
+    instalmentPlan?: Policy["instalmentPlan"];
   };
   return {
     id: row.id,
@@ -219,6 +220,7 @@ export function mapPolicy(
     createdAt: row.created_at,
     history: pas.history,
     pendingEndorsement: pas.pendingEndorsement ?? undefined,
+    instalmentPlan: pas.instalmentPlan ?? undefined,
   };
 }
 
@@ -297,5 +299,6 @@ export function policyRiskPayload(policy: Partial<Policy>) {
   return {
     history: policy.history ?? [],
     pendingEndorsement: policy.pendingEndorsement ?? null,
+    instalmentPlan: policy.instalmentPlan ?? null,
   };
 }
