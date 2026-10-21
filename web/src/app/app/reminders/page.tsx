@@ -19,6 +19,7 @@ import { compactMoney, money } from "@/lib/format";
 import { reminderMessage, reminderReason } from "@/lib/i18n/reminders";
 import type { Lang } from "@/lib/lang";
 import { markReminderSent, useReminderLog } from "@/lib/reminder-log";
+import { SendPayLink } from "@/components/send-pay-link";
 import { Button, Card, Empty, PageHeader, Stat, Table, cn } from "@/components/ui";
 
 const MANAGERS = new Set(["admin", "branch_manager", "call_center", "finance"]);
@@ -182,6 +183,8 @@ export default function RemindersPage() {
                 today={today}
                 message={text(r)}
                 hasPhone={Boolean(phone(r))}
+                phone={phone(r)}
+                lang={lang}
                 busy={busy === r.key || busy === "all"}
                 onSms={() => sendOne(r)}
                 onWhatsapp={() => whatsapp(r)}
@@ -282,6 +285,8 @@ function ReminderCard({
   today,
   message,
   hasPhone,
+  phone,
+  lang,
   busy,
   onSms,
   onWhatsapp,
@@ -290,6 +295,8 @@ function ReminderCard({
   today: string;
   message: string;
   hasPhone: boolean;
+  phone?: string;
+  lang: Lang;
   busy: boolean;
   onSms: () => void;
   onWhatsapp: () => void;
@@ -347,6 +354,16 @@ function ReminderCard({
             Collect by M-Pesa
           </Button>
         </div>
+        <SendPayLink
+          className="mt-2"
+          compact
+          policy={r.policy}
+          amount={r.amount}
+          purpose={r.track === "instalment" ? "instalment" : "renewal"}
+          note={r.instalment ? (r.instalment.n === 0 ? "Deposit" : `Instalment ${r.instalment.n} of ${r.instalment.of}`) : "Renewal"}
+          phone={phone}
+          lang={lang}
+        />
       </Card>
     </li>
   );
