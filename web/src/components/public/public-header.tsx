@@ -12,8 +12,11 @@ export function PublicHeader() {
         <Link href="/agents" className="text-mute transition hover:text-ink">
           Find an agent
         </Link>
-        <Link href="/login" className="rounded-xl border border-line px-3 py-1.5 text-ink transition hover:border-teal">
-          Sign in
+        <Link href="/my" className="text-mute transition hover:text-ink">
+          My cover
+        </Link>
+        <Link href="/login" className="hidden rounded-xl border border-line px-3 py-1.5 text-ink transition hover:border-teal sm:inline-flex">
+          Staff sign in
         </Link>
       </nav>
     </header>
