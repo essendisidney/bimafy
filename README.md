@@ -49,6 +49,10 @@ This repo ships a working **Next.js console** (`web/`), a **Postgres/Supabase sc
   SMS or WhatsApp; the client pays by STK push on their phone. The amount is fixed by the link, and when
   M-Pesa confirms, a trigger on `private.mpesa_requests` records the payment and activates the policy
   (`supabase/migrations/00016_pay_links.sql`), so it doesn't depend on any browser staying open.
+- **Agent marketplace:** `/agents` lists agents who chose to be public (they edit bio, languages and
+  counties on their Profile page); `/agents/<slug>` shows their rating and reviews and sends quote
+  requests to that agent. Reviews come only through one-time invites: created when a pay link is paid,
+  or by staff ("Ask for a review" on a policy). `supabase/migrations/00017_agent_profiles.sql`.
 - **Channels:** WhatsApp + USSD webhooks
 - **Embed:** Partner API `/api/v1`
 

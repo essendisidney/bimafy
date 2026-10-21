@@ -8,6 +8,7 @@ import { applyPolicyLifecycle, issuePolicyCertificate, type PolicyLifecycleActio
 import { money } from "@/lib/format";
 import type { PolicyStatus } from "@/lib/types";
 import { InstalmentPlanCard } from "@/components/instalment-plan";
+import { RequestReview } from "@/components/request-review";
 import { SendPayLink } from "@/components/send-pay-link";
 import { Badge, Button, Card, DetailSkeleton, Empty, PageHeader } from "@/components/ui";
 
@@ -83,6 +84,7 @@ export default function PolicyDetailPage() {
                 phone={clientPhone}
               />
             ) : null}
+            <RequestReview policy={policy} phone={clientPhone} />
           </div>
         }
       />

@@ -104,7 +104,7 @@ export function LandingHero() {
         </h1>
       </div>
 
-      <div className="animate-rise-delay md:col-start-2 md:row-span-2 md:row-start-1 md:self-center">
+      <div id="quote" className="animate-rise-delay scroll-mt-4 md:col-start-2 md:row-span-2 md:row-start-1 md:self-center">
         <InstantQuote />
       </div>
 

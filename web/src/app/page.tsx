@@ -50,6 +50,9 @@ export default function Home() {
           <Logo className="text-[1.7rem]" markClassName="h-9 w-9" />
         </Link>
         <nav className="flex items-center gap-3 text-sm sm:gap-5">
+          <Link href="/agents" className="text-mute transition hover:text-ink">
+            Find an agent
+          </Link>
           <a href="#how" className="hidden text-mute transition hover:text-ink md:inline">
             How it works
           </a>
@@ -157,6 +160,7 @@ export default function Home() {
             </p>
           </div>
           <div className="flex gap-5">
+            <Link href="/agents" className="hover:text-ink">Find an agent</Link>
             <a href="#how" className="hover:text-ink">How it works</a>
             <a href="#agents" className="hover:text-ink">For agents</a>
             <Link href="/login" className="hover:text-ink">Sign in</Link>

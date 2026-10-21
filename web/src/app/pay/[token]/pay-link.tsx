@@ -26,6 +26,7 @@ const COPY = {
     paid: "Paid — thank you!",
     paidSub: (r: string | null) => `${r ? `M-Pesa receipt ${r}. ` : ""}Your cover is active.`,
     failed: "The payment didn't go through.",
+    rate: (a: string) => `How was ${a}? Rate your agent`,
     retry: "Try again",
     missing: "This payment link doesn't exist. Please check the link or ask your agent for a new one.",
     expired: "This payment link has expired. Ask your agent to send a new one.",
@@ -46,6 +47,7 @@ const COPY = {
     paid: "Imelipwa — asante!",
     paidSub: (r: string | null) => `${r ? `Risiti ya M-Pesa ${r}. ` : ""}Bima yako iko hai.`,
     failed: "Malipo hayakufanikiwa.",
+    rate: (a: string) => `${a} alikuhudumia vipi? Toa alama`,
     retry: "Jaribu tena",
     missing: "Kiungo hiki cha malipo hakipo. Angalia kiungo au muombe wakala wako kipya.",
     expired: "Kiungo hiki kimeisha muda. Muombe wakala wako akutumie kipya.",
@@ -169,6 +171,14 @@ export function PayLinkPage({ token }: { token: string }) {
                     {t.paid}
                   </p>
                   <p className="mt-1 text-sm text-ink">{t.paidSub(receipt)}</p>
+                  {link.review_token && link.agent_name ? (
+                    <a
+                      href={`/review/${link.review_token}`}
+                      className="mt-3 flex w-full items-center justify-center rounded-xl border border-line bg-surface px-4 py-2.5 text-sm font-medium text-ink transition hover:border-teal"
+                    >
+                      {t.rate(link.agent_name.split(" ")[0])}
+                    </a>
+                  ) : null}
                 </div>
               ) : phase === "waiting" ? (
                 <div role="status" className="mt-5 rounded-2xl border border-gold/30 bg-gold/15 p-4">

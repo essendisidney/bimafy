@@ -23,6 +23,7 @@ const COPY = {
     surplus: "Pool money left after claims is shared back with members as surplus.",
     approved: "✓ Instantly approved — cover starts when M-Pesa clears.",
     cta: "Get covered — an agent calls you",
+    ctaAgent: (n: string) => `Get covered — ${n} calls you`,
     formTitle: "Where should we call you?",
     formHint: "A licensed Bimafy agent calls you, answers questions and sends the M-Pesa request. No obligation.",
     name: "Your name",
@@ -52,6 +53,7 @@ const COPY = {
     surplus: "Pesa inayobaki kwenye mfuko baada ya madai hurudishwa kwa wanachama kama ziada.",
     approved: "✓ Imeidhinishwa papo hapo — bima inaanza malipo ya M-Pesa yakikamilika.",
     cta: "Pata bima — wakala atakupigia",
+    ctaAgent: (n: string) => `Pata bima — ${n} atakupigia`,
     formTitle: "Tukupigie wapi?",
     formHint: "Wakala wa Bimafy aliyesajiliwa atakupigia, kujibu maswali na kukutumia ombi la M-Pesa. Bila lazima.",
     name: "Jina lako",
@@ -71,7 +73,7 @@ const COPY = {
 } as const;
 
 /** Zero-signup pricing on the landing page — the same engine the console binds with. */
-export function InstantQuote() {
+export function InstantQuote({ chosen }: { chosen?: { slug: string; name: string } } = {}) {
   const lang = useLang();
   const t = COPY[lang];
   const [needSlug, setNeedSlug] = useState(NEEDS[0].slug);
@@ -130,7 +132,7 @@ export function InstantQuote() {
       const res = await fetch("/api/public/request-cover", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, phone, need: need.slug, value: input, lang, company: trap }),
+        body: JSON.stringify({ name, phone, need: need.slug, value: input, lang, company: trap, agent: chosen?.slug }),
       });
       const json = (await res.json().catch(() => ({}))) as { error?: string; agentName?: string | null; agentPhone?: string | null };
       if (!res.ok) throw new Error(json.error ?? "Something went wrong");
@@ -230,7 +232,7 @@ export function InstantQuote() {
             onClick={buy}
             className="mt-4 w-full rounded-xl bg-teal px-5 py-3 text-sm font-medium text-on-accent transition hover:bg-mint"
           >
-            {t.cta}
+            {chosen ? t.ctaAgent(chosen.name.split(" ")[0]) : t.cta}
           </button>
           <button
             onClick={share}

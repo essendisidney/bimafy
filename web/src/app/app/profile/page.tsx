@@ -6,6 +6,7 @@ import { pushNotification } from "@/lib/events/ledger";
 import { participants } from "@/lib/seed";
 import { platformStore, usePlatform } from "@/lib/store";
 import type { AmlScreening } from "@/lib/types";
+import { AgentPublicProfile } from "@/components/agent-public-profile";
 import { Badge, Button, Card, PageHeader } from "@/components/ui";
 
 export default function ProfilePage() {
@@ -98,6 +99,11 @@ export default function ProfilePage() {
           </p>
         </Card>
       </div>
+      {user.role === "agent" ? (
+        <div className="mt-4">
+          <AgentPublicProfile />
+        </div>
+      ) : null}
     </div>
   );
 }
