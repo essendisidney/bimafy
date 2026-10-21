@@ -41,6 +41,10 @@ This repo ships a working **Next.js console** (`web/`), a **Postgres/Supabase sc
   same client twice. A Vercel Cron (`/api/reminders/run`, 08:00 Nairobi) sends the day's reminders
   automatically when `REMINDERS_AUTO_SEND=true`; it authenticates with `CRON_SECRET`, whose SHA-256
   must also be stored as `private.app_secrets` `reminders_cron`.
+- **Website leads:** "Get covered" on the landing page asks for a name and mobile number, re-prices the
+  request on the server, and `public.request_cover` files it as a `website` lead for the active agent
+  with the fewest open leads (max 3 a day per number, 60 per 10 minutes site-wide). The client gets a
+  confirmation SMS and the agent an SMS with the lead.
 - **Channels:** WhatsApp + USSD webhooks
 - **Embed:** Partner API `/api/v1`
 

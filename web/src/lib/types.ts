@@ -285,7 +285,7 @@ export type Payment = {
 };
 
 export type LeadStatus = "new" | "contacted" | "quoted" | "won" | "lost";
-export type LeadSource = "referral" | "walk_in" | "whatsapp" | "ussd" | "campaign" | "bulk_import" | "partner" | "renewal";
+export type LeadSource = "referral" | "walk_in" | "whatsapp" | "ussd" | "campaign" | "bulk_import" | "partner" | "renewal" | "website";
 
 export type LeadActivity = {
   id: string;

@@ -4,56 +4,15 @@ import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "reac
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/auth";
-import { priceQuote } from "@/lib/engines/quote";
-import { useLang, type Lang } from "@/lib/lang";
-import { products } from "@/lib/seed";
+import { DAYS_PER, NEEDS, PER, priceNeed } from "@/lib/instant-quote";
+import { useLang } from "@/lib/lang";
 import { money } from "@/lib/format";
-import type { Frequency } from "@/lib/types";
-import { cn } from "@/components/ui";
-
-type Ask = { kind: "sum" | "age"; def: number; min: number; max: number; step: number; label: Record<Lang, string> };
-type Need = { slug: string; label: Record<Lang, string>; ask?: Ask };
-
-const NEEDS: Need[] = [
-  {
-    slug: "motor-comprehensive",
-    label: { en: "My car", sw: "Gari langu" },
-    ask: { kind: "sum", def: 1_200_000, min: 300_000, max: 8_000_000, step: 50_000, label: { en: "Car value", sw: "Thamani ya gari" } },
-  },
-  { slug: "boda-micro", label: { en: "My boda", sw: "Boda yangu" } },
-  {
-    slug: "hospital-cash",
-    label: { en: "Hospital", sw: "Hospitali" },
-    ask: { kind: "age", def: 32, min: 18, max: 65, step: 1, label: { en: "Your age", sw: "Umri wako" } },
-  },
-  {
-    slug: "family-takaful",
-    label: { en: "My family", sw: "Familia yangu" },
-    ask: { kind: "sum", def: 1_000_000, min: 200_000, max: 5_000_000, step: 100_000, label: { en: "Cover amount", sw: "Kiasi cha bima" } },
-  },
-  {
-    slug: "gadget",
-    label: { en: "My phone", sw: "Simu yangu" },
-    ask: { kind: "sum", def: 45_000, min: 10_000, max: 250_000, step: 5_000, label: { en: "Phone value", sw: "Thamani ya simu" } },
-  },
-  {
-    slug: "janaaza",
-    label: { en: "Funeral", sw: "Mazishi" },
-    ask: { kind: "sum", def: 100_000, min: 20_000, max: 200_000, step: 10_000, label: { en: "Cover amount", sw: "Kiasi cha bima" } },
-  },
-];
-
-const PER: Record<Lang, Record<Frequency, string>> = {
-  en: { daily: "day", weekly: "week", monthly: "month", quarterly: "quarter", annually: "year", single: "trip" },
-  sw: { daily: "siku", weekly: "wiki", monthly: "mwezi", quarterly: "robo mwaka", annually: "mwaka", single: "safari" },
-};
-
-const DAYS_PER: Record<Frequency, number> = { daily: 1, weekly: 7, monthly: 365 / 12, quarterly: 365 / 4, annually: 365, single: 0 };
+import { cn, inputClass } from "@/components/ui";
 
 const COPY = {
   en: {
     eyebrow: "Your price, right now",
-    sub: "No sign-up. No call-back. Pick what you want covered.",
+    sub: "No sign-up. Pick what you want covered and see your price in seconds.",
     years: "yrs",
     flat: "Personal accident + third party for riders. One flat price.",
     perDay: (v: string) => `≈ ${v} a day`,
@@ -63,14 +22,26 @@ const COPY = {
     levies: "Government levies",
     surplus: "Pool money left after claims is shared back with members as surplus.",
     approved: "✓ Instantly approved — cover starts when M-Pesa clears.",
-    cta: "Get covered — pay with M-Pesa",
+    cta: "Get covered — an agent calls you",
+    formTitle: "Where should we call you?",
+    formHint: "A licensed Bimafy agent calls you, answers questions and sends the M-Pesa request. No obligation.",
+    name: "Your name",
+    phone: "Mobile number",
+    send: "Request a call",
+    sending: "Sending…",
+    back: "Back to the price",
+    thanks: (first: string) => `Asante, ${first}!`,
+    callFrom: (agent: string) => `${agent} from Bimafy will call you shortly. We've sent you an SMS with the details.`,
+    callAny: "A Bimafy agent will call you shortly. We've sent you an SMS with the details.",
+    whatsapp: (agent: string) => `WhatsApp ${agent} now`,
+    another: "Price something else",
     share: "Send this quote on WhatsApp",
     shareText: (product: string, price: string, extra: string, url: string) =>
       `My Bimafy quote: ${product} — ${price}${extra}. See yours in seconds: ${url}`,
   },
   sw: {
     eyebrow: "Bei yako, sasa hivi",
-    sub: "Bila kujisajili. Bila kusubiri simu. Chagua unachotaka kukinga.",
+    sub: "Bila kujisajili. Chagua unachotaka kukinga na uone bei yako kwa sekunde.",
     years: "miaka",
     flat: "Ajali binafsi + mtu wa tatu kwa waendesha boda. Bei moja.",
     perDay: (v: string) => `≈ ${v} kwa siku`,
@@ -80,7 +51,19 @@ const COPY = {
     levies: "Ushuru wa serikali",
     surplus: "Pesa inayobaki kwenye mfuko baada ya madai hurudishwa kwa wanachama kama ziada.",
     approved: "✓ Imeidhinishwa papo hapo — bima inaanza malipo ya M-Pesa yakikamilika.",
-    cta: "Pata bima — lipa kwa M-Pesa",
+    cta: "Pata bima — wakala atakupigia",
+    formTitle: "Tukupigie wapi?",
+    formHint: "Wakala wa Bimafy aliyesajiliwa atakupigia, kujibu maswali na kukutumia ombi la M-Pesa. Bila lazima.",
+    name: "Jina lako",
+    phone: "Namba ya simu",
+    send: "Omba kupigiwa",
+    sending: "Inatuma…",
+    back: "Rudi kwenye bei",
+    thanks: (first: string) => `Asante, ${first}!`,
+    callFrom: (agent: string) => `${agent} wa Bimafy atakupigia simu hivi punde. Tumekutumia SMS yenye maelezo.`,
+    callAny: "Wakala wa Bimafy atakupigia simu hivi punde. Tumekutumia SMS yenye maelezo.",
+    whatsapp: (agent: string) => `WhatsApp ${agent} sasa`,
+    another: "Angalia bei nyingine",
     share: "Tuma bei hii kwa WhatsApp",
     shareText: (product: string, price: string, extra: string, url: string) =>
       `Bei yangu ya Bimafy: ${product} — ${price}${extra}. Ona yako kwa sekunde: ${url}`,
@@ -89,32 +72,16 @@ const COPY = {
 
 /** Zero-signup pricing on the landing page — the same engine the console binds with. */
 export function InstantQuote() {
-  const router = useRouter();
-  const { loginAs } = useAuth();
   const lang = useLang();
   const t = COPY[lang];
   const [needSlug, setNeedSlug] = useState(NEEDS[0].slug);
-  const need = NEEDS.find((n) => n.slug === needSlug) ?? NEEDS[0];
-  const product = products.find((p) => p.slug === need.slug) ?? products[0];
   const [values, setValues] = useState<Record<string, number>>({});
-  const input = need.ask ? values[need.slug] ?? need.ask.def : 0;
-  const frequency = product.frequencies[0];
-
-  const quote = useMemo(
-    () =>
-      priceQuote({
-        product,
-        participantId: "guest",
-        participantName: "Guest",
-        sumCovered: need.ask?.kind === "sum" ? input : product.maxSumCovered,
-        frequency,
-        channel: "web",
-        risk: need.ask?.kind === "age" ? { age: input } : { age: 32, vehicleAge: 5 },
-      }),
-    [product, need, input, frequency],
+  // "price" → "form" (name + phone) → "done" (agent assigned, SMS sent).
+  const [step, setStep] = useState<"price" | "form" | "done">("price");
+  const { need, product, input, frequency, quote, total } = useMemo(
+    () => priceNeed(needSlug, values[needSlug])!,
+    [needSlug, values],
   );
-
-  const total = Math.max(1, Math.round(quote.total));
   const priceLabel = `${money(total)} / ${PER[lang][frequency]}`;
   const perDay = DAYS_PER[frequency] > 1 ? Math.round(quote.total / DAYS_PER[frequency]) : null;
   const levies = quote.taxes + quote.levies;
@@ -134,15 +101,46 @@ export function InstantQuote() {
     const io = new IntersectionObserver(([entry]) => setCtaVisible(entry.isIntersecting));
     io.observe(el);
     return () => io.disconnect();
-  }, []);
+    // The button is re-mounted when the visitor comes back to the price.
+  }, [step]);
 
   // The card sits inside an animated (transformed) wrapper, which would trap a `fixed` child,
   // so the sticky bar is portalled to <body> once we're on the client.
   const onClient = useSyncExternalStore(noopSubscribe, () => true, () => false);
 
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [trap, setTrap] = useState("");
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [agent, setAgent] = useState<{ name: string | null; phone: string | null }>({ name: null, phone: null });
+  const cardRef = useRef<HTMLDivElement>(null);
+
   function buy() {
-    loginAs("u-part");
-    router.push(`/app/quotes/new?product=${product.slug}`);
+    setStep("form");
+    setError(null);
+    cardRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  async function requestCall(e: React.FormEvent) {
+    e.preventDefault();
+    setSending(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/public/request-cover", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, phone, need: need.slug, value: input, lang, company: trap }),
+      });
+      const json = (await res.json().catch(() => ({}))) as { error?: string; agentName?: string | null; agentPhone?: string | null };
+      if (!res.ok) throw new Error(json.error ?? "Something went wrong");
+      setAgent({ name: json.agentName ?? null, phone: json.agentPhone ?? null });
+      setStep("done");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setSending(false);
+    }
   }
 
   function share() {
@@ -152,7 +150,7 @@ export function InstantQuote() {
   }
 
   return (
-    <div className="rounded-[1.75rem] border border-line bg-surface p-5 shadow-lift md:p-7">
+    <div ref={cardRef} className="scroll-mt-4 rounded-[1.75rem] border border-line bg-surface p-5 shadow-lift md:p-7">
       <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-teal">{t.eyebrow}</p>
       <p className="mt-1 text-sm text-mute">{t.sub}</p>
 
@@ -225,28 +223,106 @@ export function InstantQuote() {
         <p className="mt-3 text-xs text-champagne/75">{quote.uwDecision === "auto_accept" ? t.approved : quote.uwNotes}</p>
       </div>
 
-      <button
-        ref={ctaRef}
-        onClick={buy}
-        className="mt-4 w-full rounded-xl bg-teal px-5 py-3 text-sm font-medium text-on-accent transition hover:bg-mint"
-      >
-        {t.cta}
-      </button>
-      <button
-        onClick={share}
-        className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl border border-line bg-surface px-5 py-2.5 text-sm text-ink transition hover:border-teal hover:text-teal"
-      >
-        {t.share}
-      </button>
+      {step === "price" ? (
+        <>
+          <button
+            ref={ctaRef}
+            onClick={buy}
+            className="mt-4 w-full rounded-xl bg-teal px-5 py-3 text-sm font-medium text-on-accent transition hover:bg-mint"
+          >
+            {t.cta}
+          </button>
+          <button
+            onClick={share}
+            className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl border border-line bg-surface px-5 py-2.5 text-sm text-ink transition hover:border-teal hover:text-teal"
+          >
+            {t.share}
+          </button>
+        </>
+      ) : step === "form" ? (
+        <form onSubmit={requestCall} className="mt-4 space-y-3" noValidate>
+          <div>
+            <p className="font-display text-lg text-heading">{t.formTitle}</p>
+            <p className="text-xs text-mute">{t.formHint}</p>
+          </div>
+          <label className="block text-sm">
+            <span className="mb-1 block font-medium">{t.name}</span>
+            <input className={inputClass} value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" required maxLength={80} autoFocus />
+          </label>
+          <label className="block text-sm">
+            <span className="mb-1 block font-medium">{t.phone}</span>
+            <input
+              className={inputClass}
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              type="tel"
+              inputMode="tel"
+              autoComplete="tel"
+              placeholder="07XX XXX XXX"
+              required
+            />
+          </label>
+          {/* Hidden from people; bots fill it in. */}
+          <input
+            type="text"
+            name="company"
+            value={trap}
+            onChange={(e) => setTrap(e.target.value)}
+            tabIndex={-1}
+            autoComplete="off"
+            aria-hidden
+            className="absolute -left-[9999px] h-0 w-0 opacity-0"
+          />
+          {error ? (
+            <p role="alert" className="rounded-xl border border-danger/25 bg-danger/10 px-3 py-2 text-sm text-danger">
+              {error}
+            </p>
+          ) : null}
+          <button
+            type="submit"
+            disabled={sending}
+            className="w-full rounded-xl bg-teal px-5 py-3 text-sm font-medium text-on-accent transition hover:bg-mint disabled:opacity-60"
+          >
+            {sending ? t.sending : `${t.send} · ${money(total)} / ${PER[lang][frequency]}`}
+          </button>
+          <button type="button" onClick={() => setStep("price")} className="w-full py-1 text-sm text-mute hover:text-ink">
+            {t.back}
+          </button>
+        </form>
+      ) : (
+        <div className="mt-4 rounded-2xl border border-teal/25 bg-teal/10 p-4" role="status">
+          <p className="font-display text-xl text-heading">{t.thanks(name.trim().split(" ")[0])}</p>
+          <p className="mt-1 text-sm text-ink">{agent.name ? t.callFrom(agent.name) : t.callAny}</p>
+          {agent.phone && agent.name ? (
+            <a
+              href={`https://wa.me/${agent.phone.replace(/\D/g, "")}?text=${encodeURIComponent(
+                `${lang === "sw" ? "Habari" : "Hi"} ${agent.name.split(" ")[0]}, ${lang === "sw" ? "ni" : "it's"} ${name.trim()} — ${product.name}, ${money(total)} / ${PER[lang][frequency]}.`,
+              )}`}
+              target="_blank"
+              rel="noopener"
+              className="mt-3 flex w-full items-center justify-center rounded-xl bg-teal px-5 py-3 text-sm font-medium text-on-accent transition hover:bg-mint"
+            >
+              {t.whatsapp(agent.name.split(" ")[0])}
+            </a>
+          ) : null}
+          <button
+            type="button"
+            onClick={() => setStep("price")}
+            className="mt-2 w-full py-1 text-sm text-mute hover:text-ink"
+          >
+            {t.another}
+          </button>
+        </div>
+      )}
 
       {onClient
         ? createPortal(
           <div
             className={cn(
               "fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface/95 px-4 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 shadow-lift backdrop-blur transition-transform md:hidden",
-              ctaVisible ? "translate-y-full" : "translate-y-0",
+              ctaVisible || step !== "price" ? "translate-y-full" : "translate-y-0",
             )}
-            aria-hidden={ctaVisible}
+            aria-hidden={ctaVisible || step !== "price"}
           >
             <div className="mx-auto flex max-w-md items-center justify-between gap-3">
               <div className="min-w-0">
@@ -258,7 +334,7 @@ export function InstantQuote() {
               </div>
               <button
                 onClick={buy}
-                tabIndex={ctaVisible ? -1 : 0}
+                tabIndex={ctaVisible || step !== "price" ? -1 : 0}
                 className="shrink-0 rounded-xl bg-teal px-4 py-3 text-sm font-medium text-on-accent transition hover:bg-mint"
               >
                 {lang === "sw" ? "Pata bima" : "Get covered"}

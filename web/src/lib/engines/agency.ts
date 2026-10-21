@@ -87,6 +87,8 @@ function lastTouch(lead: Lead) {
 const SOURCE_POINTS: Record<LeadSource, number> = {
   referral: 18,
   renewal: 18,
+  // Priced their own cover and left a number: as warm as a referral.
+  website: 16,
   walk_in: 12,
   whatsapp: 10,
   partner: 10,
