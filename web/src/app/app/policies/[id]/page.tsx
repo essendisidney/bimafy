@@ -3,11 +3,12 @@
 import { SearchX } from "lucide-react";
 import { useParams } from "next/navigation";
 import { downloadTextFile } from "@/lib/documents/certificate";
-import { updatePolicyRemote, usePaymentsBook, usePoliciesBook } from "@/lib/data";
+import { updatePolicyRemote, useParticipants, usePaymentsBook, usePoliciesBook } from "@/lib/data";
 import { applyPolicyLifecycle, issuePolicyCertificate, type PolicyLifecycleAction } from "@/lib/events/ledger";
 import { money } from "@/lib/format";
 import type { PolicyStatus } from "@/lib/types";
 import { InstalmentPlanCard } from "@/components/instalment-plan";
+import { SendPayLink } from "@/components/send-pay-link";
 import { Badge, Button, Card, DetailSkeleton, Empty, PageHeader } from "@/components/ui";
 
 const transitions: { label: string; action: PolicyLifecycleAction; status: PolicyStatus }[] = [
@@ -23,7 +24,9 @@ export default function PolicyDetailPage() {
   const { id } = useParams<{ id: string }>();
   const { policies, loading, refresh } = usePoliciesBook();
   const { payments } = usePaymentsBook();
+  const { participants } = useParticipants();
   const policy = policies.find((p) => p.id === id);
+  const clientPhone = participants.find((p) => p.id === policy?.participantId)?.phone;
 
   if (loading) return <DetailSkeleton label="Loading policy" />;
   if (!policy) return (
@@ -72,6 +75,14 @@ export default function PolicyDetailPage() {
               Download certificate
             </Button>
             <Button href={`/app/claims/new?policy=${policy.id}`}>File claim</Button>
+            {policy.status !== "cancelled" ? (
+              <SendPayLink
+                policy={policy}
+                amount={policy.contribution}
+                purpose={policy.status === "active" || policy.status === "reinstated" ? "renewal" : "premium"}
+                phone={clientPhone}
+              />
+            ) : null}
           </div>
         }
       />
@@ -145,6 +156,7 @@ export default function PolicyDetailPage() {
           <InstalmentPlanCard
             policy={policy}
             payments={payments}
+            phone={clientPhone}
             onSave={async (plan) => {
               await updatePolicyRemote(policy.id, { instalmentPlan: plan ?? undefined });
               refresh();

@@ -12,6 +12,7 @@ import {
 } from "@/lib/engines/reminders";
 import { money } from "@/lib/format";
 import type { InstalmentPlan as Plan, Payment, Policy } from "@/lib/types";
+import { SendPayLink } from "@/components/send-pay-link";
 import { Button, Card, Field, cn, inputClass } from "@/components/ui";
 
 const COUNTS = [2, 3, 4, 6, 10];
@@ -28,10 +29,12 @@ const STATE: Record<InstalmentState, [string, string]> = {
 export function InstalmentPlanCard({
   policy,
   payments,
+  phone,
   onSave,
 }: {
   policy: Policy;
   payments: Payment[];
+  phone?: string;
   onSave: (plan: Plan | null) => Promise<void>;
 }) {
   const [today] = useState(() => eatDay(new Date()));
@@ -72,6 +75,8 @@ export function InstalmentPlanCard({
   }
 
   const s = status!;
+  // Late clients are asked for everything overdue, not just the next instalment.
+  const owed = s.next ? (s.next.due < today ? Math.max(s.overdueAmount, s.next.amount - s.next.paid) : s.next.amount - s.next.paid) : 0;
   return (
     <Card className="p-5">
       <div className="flex flex-wrap items-start justify-between gap-2">
@@ -111,13 +116,18 @@ export function InstalmentPlanCard({
       {error ? <p className="mt-3 text-sm text-danger">{error}</p> : null}
       <div className="mt-4 flex flex-wrap gap-2">
         {s.next ? (
-          <Button
-            href={`/app/payments?policy=${encodeURIComponent(policy.id)}&amount=${Math.round(
-              s.next.due < today ? Math.max(s.overdueAmount, s.next.amount - s.next.paid) : s.next.amount - s.next.paid,
-            )}`}
-          >
-            Collect {money(s.next.due < today ? Math.max(s.overdueAmount, s.next.amount - s.next.paid) : s.next.amount - s.next.paid)} by M-Pesa
-          </Button>
+          <>
+            <Button href={`/app/payments?policy=${encodeURIComponent(policy.id)}&amount=${Math.round(owed)}`}>
+              Collect {money(owed)} by M-Pesa
+            </Button>
+            <SendPayLink
+              policy={policy}
+              amount={owed}
+              purpose="instalment"
+              note={s.next.n === 0 ? "Deposit" : `Instalment ${s.next.n} of ${plan.count}`}
+              phone={phone}
+            />
+          </>
         ) : null}
         <Button variant="secondary" onClick={() => setEditing(true)}>
           Change plan

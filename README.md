@@ -45,6 +45,10 @@ This repo ships a working **Next.js console** (`web/`), a **Postgres/Supabase sc
   request on the server, and `public.request_cover` files it as a `website` lead for the active agent
   with the fewest open leads (max 3 a day per number, 60 per 10 minutes site-wide). The client gets a
   confirmation SMS and the agent an SMS with the lead.
+- **Pay links:** staff send a client `/pay/<token>` (from a policy, an instalment plan or a reminder) by
+  SMS or WhatsApp; the client pays by STK push on their phone. The amount is fixed by the link, and when
+  M-Pesa confirms, a trigger on `private.mpesa_requests` records the payment and activates the policy
+  (`supabase/migrations/00016_pay_links.sql`), so it doesn't depend on any browser staying open.
 - **Channels:** WhatsApp + USSD webhooks
 - **Embed:** Partner API `/api/v1`
 
