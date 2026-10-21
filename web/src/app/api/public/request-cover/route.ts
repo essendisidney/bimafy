@@ -11,7 +11,7 @@ import { kenyanMobile, sendSms } from "@/lib/sms";
  * throttles abuse), then text the client a confirmation and the agent the lead.
  */
 export async function POST(request: Request) {
-  let body: { name?: string; phone?: string; need?: string; value?: number; lang?: string; company?: string };
+  let body: { name?: string; phone?: string; need?: string; value?: number; lang?: string; company?: string; agent?: string };
   try {
     body = await request.json();
   } catch {
@@ -46,7 +46,10 @@ export async function POST(request: Request) {
   const notes = `${priced.product.name}${detail}. Quoted ${price} on the website (${lang === "sw" ? "Kiswahili" : "English"}).`;
 
   // Demo deployments (no database) show the flow without filing or texting anyone.
-  if (!isSupabaseConfigured()) return NextResponse.json({ ok: true, demo: true, agentName: "Joseph Otieno", agentPhone: null });
+  if (!isSupabaseConfigured()) {
+    const chosen = typeof body.agent === "string" ? body.agent.split("-").map((w) => w[0]?.toUpperCase() + w.slice(1)).join(" ") : "";
+    return NextResponse.json({ ok: true, demo: true, agentName: chosen || "Joseph Otieno", agentPhone: null });
+  }
 
   const { url, key } = getSupabaseEnv();
   const db = createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
@@ -58,6 +61,8 @@ export async function POST(request: Request) {
       notes,
       annual_value: priced.annual,
       operator_id: process.env.NEXT_PUBLIC_OPERATOR_ID ?? "",
+      // The agent the customer chose on their public profile, if any.
+      agent_slug: typeof body.agent === "string" && /^[a-z0-9-]{1,80}$/.test(body.agent) ? body.agent : "",
     },
   });
   if (error) {

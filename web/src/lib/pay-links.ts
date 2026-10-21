@@ -15,6 +15,8 @@ export type PayLinkView = {
   agent_name: string | null;
   checkout_request_id: string | null;
   receipt: string | null;
+  /** Once paid: one-time link to rate the agent (/review/<token>). */
+  review_token?: string | null;
 };
 
 /** Pay links are 22-character URL-safe tokens; anything else is never sent to the database. */
@@ -38,6 +40,7 @@ export const DEMO_VIEW: PayLinkView = {
   agent_name: "Joseph Otieno",
   checkout_request_id: null,
   receipt: null,
+  review_token: "demo",
 };
 
 /** The SMS/WhatsApp text that carries a link. Plain GSM characters so it stays one cheap SMS part. */
