@@ -94,6 +94,7 @@ export const navItems: NavItem[] = [
   { href: "/app/compliance", label: "Regulatory", roles: ["compliance", "admin", "shariah_officer"], section: "Insight & control", icon: "regulatory" },
   { href: "/app/integrations", label: "APIs & partners", roles: STAFF_CONNECT, section: "Insight & control", icon: "apis" },
   { href: "/app/team", label: "Agents", roles: ["admin", "branch_manager"], section: "Insight & control", icon: "agency" },
+  { href: "/app/setup", label: "Go live", roles: ["admin"], section: "Insight & control", icon: "regulatory" },
   { href: "/app/admin", label: "Administration", roles: ["admin"], section: "Insight & control", icon: "admin" },
 ];
 

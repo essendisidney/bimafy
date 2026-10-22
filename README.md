@@ -63,6 +63,10 @@ This repo ships a working **Next.js console** (`web/`), a **Postgres/Supabase sc
   short-lived links. When staff move a claim to documents pending, assessor assigned, approved, paid or
   rejected, the customer gets one SMS per step (`public.claim_step`, migration 00019) and sees the step
   timeline on `/my`.
+- **Go-live checklist (`/app/setup`, admins):** shows what is connected (database, SMS, server secret,
+  8am reminders, M-Pesa, agents, products, domain) with exact fixes; "Connect to database" registers
+  the server's CRON_SECRET / MPESA_CALLBACK_SECRET hashes (no SQL needed) and "Send me a test SMS"
+  proves texting works. Migration 00020.
 - **Channels:** WhatsApp + USSD webhooks
 - **Embed:** Partner API `/api/v1`
 
