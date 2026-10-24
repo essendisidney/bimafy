@@ -45,10 +45,17 @@ test("every reminder is plain GSM text that fits in two SMS parts", () => {
   for (const today of days) {
     for (const r of reminderQueue({ policies: f.policies, payments: f.payments, today }).due) {
       for (const lang of ["en", "sw"]) {
-        const text = reminderMessage(lang, r, "Joseph");
         kinds.add(r.kind);
-        assert.match(text, /^[\x20-\x7E]+$/, `${lang} ${r.kind} has non-GSM characters: ${text}`);
-        assert.ok(text.length <= 306, `${lang} ${r.kind} is ${text.length} chars`);
+        const url = "https://bimafy.vercel.app/pay/AbCdEfGhIjKlMnOpQrStUv";
+        for (const payUrl of [undefined, url]) {
+          const text = reminderMessage(lang, r, "Joseph", payUrl);
+          assert.match(text, /^[\x20-\x7E]+$/, `${lang} ${r.kind} has non-GSM characters: ${text}`);
+          assert.ok(text.length <= 306, `${lang} ${r.kind} is ${text.length} chars`);
+          if (payUrl) {
+            assert.ok(text.includes(url), `${lang} ${r.kind} lacks the link`);
+            assert.ok(!/Reply YES|Jibu NDIYO/i.test(text), `${lang} ${r.kind} still asks for a reply`);
+          }
+        }
       }
     }
   }
