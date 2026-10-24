@@ -1,14 +1,17 @@
 "use client";
 
-import { Check, Copy, KeyRound, MessageCircle, UserPlus } from "lucide-react";
+import { BadgeCheck, Check, Copy, Inbox, KeyRound, MessageCircle, UserPlus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { whatsappLink } from "@/lib/engines/agency";
+import { lineLabel, type Application } from "@/lib/agent-applications";
 import { inviteMessage, newAgentProblem, type NewAgentInput } from "@/lib/invite";
 import { agents as demoAgents } from "@/lib/seed";
 import {
   canManageAgents,
   createAgent,
+  decideApplication,
+  listApplications,
   listBranches,
   listTeam,
   resetAgentPassword,
@@ -21,7 +24,7 @@ import { Badge, Button, Card, Field, PageHeader, SkeletonRows, Table, inputClass
 const EMPTY: NewAgentInput = { fullName: "", email: "", phone: "", branchCode: "", salesTarget: "" };
 
 /** What the admin needs to hand to the agent right now (the password is never shown again). */
-type Handover = { name: string; email: string; phone: string; password: string; code?: string; reset?: boolean };
+type Handover = { name: string; email: string; phone: string; password: string; code?: string; reset?: boolean; texted?: boolean };
 
 export default function TeamPage() {
   const { user, operatorId } = useAuth();
@@ -32,7 +35,7 @@ export default function TeamPage() {
       <PageHeader
         eyebrow="Team"
         title="Agents"
-        description="Add agents, send them their login on WhatsApp, reset passwords and switch access off — no IT needed."
+        description="Approve agents who applied on the website, add agents yourself, reset passwords and switch access off — no IT needed."
       />
       {manage && operatorId ? <ManageTeam operatorId={operatorId} /> : <DemoTeam />}
     </div>
@@ -41,6 +44,7 @@ export default function TeamPage() {
 
 function ManageTeam({ operatorId }: { operatorId: string }) {
   const [team, setTeam] = useState<TeamAgent[] | null>(null);
+  const [applications, setApplications] = useState<Application[]>([]);
   const [branches, setBranches] = useState<Branch[]>([]);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [handover, setHandover] = useState<Handover | null>(null);
@@ -48,11 +52,12 @@ function ManageTeam({ operatorId }: { operatorId: string }) {
 
   useEffect(() => {
     let cancelled = false;
-    Promise.all([listTeam(operatorId), listBranches(operatorId)])
-      .then(([t, b]) => {
+    Promise.all([listTeam(operatorId), listBranches(operatorId), listApplications().catch(() => [] as Application[])])
+      .then(([t, b, apps]) => {
         if (cancelled) return;
         setTeam(t);
         setBranches(b);
+        setApplications(apps);
         setLoadError(null);
       })
       .catch((e: Error) => !cancelled && setLoadError(e.message));
@@ -63,37 +68,183 @@ function ManageTeam({ operatorId }: { operatorId: string }) {
 
   const reload = () => setReloadKey((k) => k + 1);
 
+  const pending = applications.filter((a) => a.status === "pending");
+
   return (
-    <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
-      <div className="space-y-4">
-        {handover ? <HandoverCard handover={handover} onDone={() => setHandover(null)} /> : null}
-        <AddAgentCard
+    <div className="space-y-4">
+      {pending.length ? (
+        <ApplicationsCard
+          applications={pending}
           branches={branches}
-          onCreated={(h) => {
+          onApproved={(h) => {
             setHandover(h);
             reload();
           }}
+          onDeclined={reload}
         />
-      </div>
-      <Card className="p-2">
-        <div className="flex items-baseline justify-between px-3 pt-3">
-          <h2 className="font-display text-xl text-heading">Your agents</h2>
-          {team ? <p className="text-xs text-mute">{team.length} total</p> : null}
+      ) : null}
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
+        <div className="space-y-4">
+          {handover ? <HandoverCard handover={handover} onDone={() => setHandover(null)} /> : null}
+          <AddAgentCard
+            branches={branches}
+            onCreated={(h) => {
+              setHandover(h);
+              reload();
+            }}
+          />
         </div>
-        {loadError ? <p className="px-3 py-4 text-sm text-danger">{loadError}</p> : null}
-        {!team && !loadError ? <SkeletonRows rows={4} /> : null}
-        {team && team.length === 0 ? (
-          <p className="px-3 py-6 text-sm text-mute">No agents yet. Add your first one on the left.</p>
-        ) : null}
-        {team && team.length > 0 ? (
-          <Table headers={["Agent", "Branch", "Status", ""]}>
-            {team.map((a) => (
-              <AgentRow key={a.id} agent={a} onHandover={setHandover} onChanged={reload} />
-            ))}
-          </Table>
-        ) : null}
-      </Card>
+        <Card className="p-2">
+          <div className="flex items-baseline justify-between px-3 pt-3">
+            <h2 className="font-display text-xl text-heading">Your agents</h2>
+            {team ? <p className="text-xs text-mute">{team.length} total</p> : null}
+          </div>
+          {loadError ? <p className="px-3 py-4 text-sm text-danger">{loadError}</p> : null}
+          {!team && !loadError ? <SkeletonRows rows={4} /> : null}
+          {team && team.length === 0 ? (
+            <p className="px-3 py-6 text-sm text-mute">No agents yet. Add your first one on the left.</p>
+          ) : null}
+          {team && team.length > 0 ? (
+            <Table headers={["Agent", "Branch", "Status", ""]}>
+              {team.map((a) => (
+                <AgentRow key={a.id} agent={a} onHandover={setHandover} onChanged={reload} />
+              ))}
+            </Table>
+          ) : null}
+        </Card>
+      </div>
     </div>
+  );
+}
+
+/** Agents who applied at /agents/join. Approving creates their login and texts it to them. */
+function ApplicationsCard({
+  applications,
+  branches,
+  onApproved,
+  onDeclined,
+}: {
+  applications: Application[];
+  branches: Branch[];
+  onApproved: (h: Handover) => void;
+  onDeclined: () => void;
+}) {
+  return (
+    <Card className="border-gold/50 p-5">
+      <h2 className="flex items-center gap-2 font-display text-xl text-heading">
+        <Inbox className="h-5 w-5 text-gold-ink" aria-hidden /> {applications.length} agent application{applications.length === 1 ? "" : "s"} waiting
+      </h2>
+      <p className="mt-1 text-sm text-mute">
+        From your website&apos;s &ldquo;Become an agent&rdquo; page. Check their IRA licence on the{" "}
+        <a href="https://www.ira.go.ke" target="_blank" rel="noopener noreferrer" className="text-teal-ink underline">
+          IRA website
+        </a>{" "}
+        before ticking it as checked.
+      </p>
+      <ul className="mt-4 grid gap-3 md:grid-cols-2">
+        {applications.map((a) => (
+          <ApplicationItem key={a.id} app={a} branches={branches} onApproved={onApproved} onDeclined={onDeclined} />
+        ))}
+      </ul>
+    </Card>
+  );
+}
+
+function ApplicationItem({
+  app,
+  branches,
+  onApproved,
+  onDeclined,
+}: {
+  app: Application;
+  branches: Branch[];
+  onApproved: (h: Handover) => void;
+  onDeclined: () => void;
+}) {
+  const [branchCode, setBranchCode] = useState("");
+  const [licenseChecked, setLicenseChecked] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const local = app.phone.startsWith("254") ? `0${app.phone.slice(3)}` : app.phone;
+
+  async function decide(approve: boolean) {
+    let reason: string | undefined;
+    if (!approve) {
+      const answer = window.prompt(`Decline ${app.name}? Optional reason (it's included in the SMS to them):`, "");
+      if (answer === null) return;
+      reason = answer;
+    }
+    setBusy(true);
+    setError(null);
+    try {
+      const d = await decideApplication({ id: app.id, approve, licenseChecked, branchCode, reason });
+      if (d.status === "approved" && d.agent) {
+        onApproved({ name: app.name, email: d.agent.email, phone: app.phone, password: d.agent.password, code: d.agent.code, texted: d.texted });
+      } else {
+        onDeclined();
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "That didn't work. Try again.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <li className="rounded-2xl border border-line bg-paper p-4">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="font-medium text-heading">{app.name}</p>
+          <p className="truncate text-xs text-mute">
+            {local} · {app.email}
+          </p>
+        </div>
+        <p className="shrink-0 text-xs text-mute">{new Date(app.created_at).toLocaleDateString("en-KE", { day: "numeric", month: "short" })}</p>
+      </div>
+      <dl className="mt-2 space-y-0.5 text-xs">
+        <div className="flex gap-2">
+          <dt className="text-mute">Sells</dt>
+          <dd>{app.lines.map(lineLabel).join(", ") || "—"}</dd>
+        </div>
+        <div className="flex gap-2">
+          <dt className="text-mute">Where</dt>
+          <dd>
+            {app.county ?? "—"}
+            {app.years_experience != null ? ` · ${app.years_experience} yr${app.years_experience === 1 ? "" : "s"} selling` : ""}
+          </dd>
+        </div>
+        <div className="flex gap-2">
+          <dt className="text-mute">IRA licence</dt>
+          <dd className="font-mono">{app.license_number ?? "not given"}</dd>
+        </div>
+      </dl>
+      {app.message ? <p className="mt-2 rounded-xl bg-sand px-3 py-2 text-xs text-ink">&ldquo;{app.message}&rdquo;</p> : null}
+      <div className="mt-3 grid gap-2 sm:grid-cols-2">
+        <select className={inputClass} value={branchCode} onChange={(e) => setBranchCode(e.target.value)} aria-label="Branch">
+          <option value="">Head office</option>
+          {branches.map((b) => (
+            <option key={b.code} value={b.code}>
+              {b.name}
+            </option>
+          ))}
+        </select>
+        {app.license_number ? (
+          <label className="flex items-center gap-2 text-xs">
+            <input type="checkbox" checked={licenseChecked} onChange={(e) => setLicenseChecked(e.target.checked)} />
+            <BadgeCheck className="h-3.5 w-3.5 text-teal-ink" aria-hidden /> I checked this licence
+          </label>
+        ) : null}
+      </div>
+      {error ? <p role="alert" className="mt-2 text-xs text-danger">{error}</p> : null}
+      <div className="mt-3 flex gap-2">
+        <Button className="flex-1" disabled={busy} onClick={() => decide(true)}>
+          {busy ? "Saving…" : "Approve & text login"}
+        </Button>
+        <Button variant="ghost" disabled={busy} onClick={() => decide(false)}>
+          Decline
+        </Button>
+      </div>
+    </li>
   );
 }
 
@@ -205,7 +356,11 @@ function HandoverCard({ handover, onDone }: { handover: Handover; onDone: () => 
           <dd className="font-mono font-semibold text-heading">{handover.password}</dd>
         </div>
       </dl>
-      <p className="mt-3 text-xs text-gold-ink">This password is shown only once. Send it before you close this card.</p>
+      {handover.texted ? (
+        <p className="mt-3 text-xs text-teal-ink">We texted this login to {handover.name.split(" ")[0]}. Send it on WhatsApp too if they don&apos;t get the SMS.</p>
+      ) : (
+        <p className="mt-3 text-xs text-gold-ink">This password is shown only once. Send it before you close this card.</p>
+      )}
       <div className="mt-4 flex flex-wrap gap-2">
         {handover.phone ? (
           <button

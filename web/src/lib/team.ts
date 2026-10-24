@@ -2,6 +2,7 @@
 
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { isUuid } from "@/lib/ids";
+import type { Application } from "./agent-applications";
 import type { SessionUser } from "./types";
 
 /**
@@ -124,4 +125,37 @@ export async function setAgentStatus(agentId: string, status: "active" | "suspen
   const client = await sb();
   const { error } = await client.rpc("admin_set_agent_status", { p_agent_id: agentId, p_status: status });
   if (error) throw new Error(friendly(error));
+}
+
+/** Agents who applied on the website (/agents/join), newest pending first. */
+export async function listApplications(): Promise<Application[]> {
+  const client = await sb();
+  const { data, error } = await client.rpc("agent_applications_list");
+  if (error) throw new Error(friendly(error));
+  return (data ?? []) as Application[];
+}
+
+export type Decision = { status: "approved" | "declined"; texted: boolean; agent: { code: string; email: string; password: string } | null };
+
+/** Approve (creates the login and texts it) or decline (texts a polite no). */
+export async function decideApplication(input: {
+  id: string;
+  approve: boolean;
+  licenseChecked?: boolean;
+  branchCode?: string;
+  reason?: string;
+}): Promise<Decision> {
+  let res: Response;
+  try {
+    res = await fetch("/api/admin/agent-applications", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(input),
+    });
+  } catch {
+    throw new Error("No connection. Reviewing applications needs internet.");
+  }
+  const json = (await res.json().catch(() => ({}))) as Partial<Decision> & { error?: string };
+  if (!res.ok) throw new Error(json.error ?? "That didn't work. Try again.");
+  return json as Decision;
 }
