@@ -1,7 +1,8 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 import { eatDay, reminderQueue, type Reminder } from "@/lib/engines/reminders";
-import { reminderMessage } from "@/lib/i18n/reminders";
+import { siteUrl } from "@/lib/claim-messages";
+import { reminderLinkNote, reminderMessage } from "@/lib/i18n/reminders";
 import { feedPolicies, type ReminderFeed } from "@/lib/reminders-feed";
 import { getSupabaseEnv, isSupabaseConfigured } from "@/lib/supabase/config";
 import { isSmsLiveConfigured, sendSms, smsProvider } from "@/lib/sms";
@@ -60,6 +61,7 @@ export async function GET(request: Request) {
     kinds: countBy(queue.due.map((r) => r.kind)),
   };
   if (!live) return NextResponse.json(summary);
+  const site = siteUrl(request.url);
 
   const send = async (r: Reminder) => {
     const { data: claimed, error: claimError } = await db.rpc("reminders_claim", {
@@ -76,7 +78,16 @@ export async function GET(request: Request) {
       summary.alreadyHandled++;
       return;
     }
-    const text = reminderMessage(lang, r, feed.agentNames.get(r.policy.id)?.split(" ")[0] ?? "Bimafy");
+    // A pay link lets the customer pay from the SMS; if it can't be made, send the reply-YES text.
+    const { data: token } = await db.rpc("reminders_pay_link", {
+      p_secret: secret,
+      p_policy_id: r.policy.id,
+      p_amount: r.amount,
+      p_purpose: r.track === "instalment" ? "instalment" : "renewal",
+      p_note: reminderLinkNote(r),
+    });
+    const payUrl = typeof token === "string" ? `${site}/pay/${token}` : null;
+    const text = reminderMessage(lang, r, feed.agentNames.get(r.policy.id)?.split(" ")[0] ?? "Bimafy", payUrl);
     try {
       const sms = await sendSms(feed.phones.get(r.policy.id)!, text);
       summary.sent++;

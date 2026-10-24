@@ -16,7 +16,10 @@ import {
 } from "@/lib/engines/reminders";
 import { pushNotification } from "@/lib/events/ledger";
 import { compactMoney, money } from "@/lib/format";
-import { reminderMessage, reminderReason } from "@/lib/i18n/reminders";
+import { reminderLinkNote, reminderMessage, reminderReason } from "@/lib/i18n/reminders";
+import { DEMO_TOKEN } from "@/lib/pay-links";
+import { createClient } from "@/lib/supabase/client";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
 import type { Lang } from "@/lib/lang";
 import { markReminderSent, useReminderLog } from "@/lib/reminder-log";
 import { SendPayLink } from "@/components/send-pay-link";
@@ -60,31 +63,54 @@ export default function RemindersPage() {
   );
 
   const agentName = user?.name?.split(" ")[0] ?? "your agent";
-  const text = (r: Reminder) => reminderMessage(lang, r, agentName);
+  // The preview shows where the link goes; the real link is made when the reminder is sent.
+  const text = (r: Reminder, payUrl?: string | null) =>
+    reminderMessage(lang, r, agentName, payUrl === undefined ? "bimafy.vercel.app/pay/..." : payUrl);
+
+  /** A pay link for this reminder (the database reuses an open one for the same amount). */
+  async function payLinkFor(r: Reminder): Promise<string | null> {
+    try {
+      let token = DEMO_TOKEN;
+      if (isSupabaseConfigured()) {
+        const { data, error } = await createClient().rpc("pay_link_create", {
+          p_policy_id: r.policy.id,
+          p_amount: Math.round(r.amount),
+          p_purpose: r.track === "instalment" ? "instalment" : "renewal",
+          p_note: reminderLinkNote(r),
+        });
+        if (error || typeof data !== "string") return null;
+        token = data;
+      }
+      return `${window.location.origin}/pay/${token}`;
+    } catch {
+      return null;
+    }
+  }
   const phone = (r: Reminder) => phoneOf.get(r.policy.participantId);
   const sendable = queue.due.filter((r) => phone(r));
   const behind = plans.filter((p) => p.status.health === "behind" || p.status.health === "at_risk");
   const overdue = plans.reduce((s, p) => s + p.status.overdueAmount, 0);
 
-  function record(r: Reminder, channel: "sms" | "whatsapp", messageId?: string) {
+  function record(r: Reminder, channel: "sms" | "whatsapp", body: string, messageId?: string) {
     void markReminderSent(r.key, channel, { policyId: r.policy.id, kind: r.kind, messageId });
     pushNotification({
       channel,
       title: `Reminder · ${r.policy.participantName}`,
-      body: text(r),
+      body,
       href: `/app/policies/${r.policy.id}`,
     });
   }
 
   async function sms(r: Reminder): Promise<string | null> {
+    const message = text(r, await payLinkFor(r));
     const res = await fetch("/api/reminders/sms", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ phone: phone(r), message: text(r) }),
+      body: JSON.stringify({ phone: phone(r), message }),
     });
     const json = (await res.json().catch(() => ({}))) as { error?: string; mode?: string; messageId?: string };
     if (!res.ok) throw new Error(json.error ?? "SMS failed");
-    record(r, "sms", json.messageId);
+    record(r, "sms", message, json.messageId);
     return json.mode ?? null;
   }
 
@@ -123,9 +149,15 @@ export default function RemindersPage() {
     );
   }
 
-  function whatsapp(r: Reminder) {
-    window.open(whatsappLink(phone(r)!, text(r)), "_blank", "noopener");
-    record(r, "whatsapp");
+  async function whatsapp(r: Reminder) {
+    // Open the tab during the tap (pop-up blockers allow that), then fill it once the link exists.
+    const tab = window.open("", "_blank");
+    if (tab) tab.opener = null;
+    const message = text(r, await payLinkFor(r));
+    const url = whatsappLink(phone(r)!, message);
+    if (tab) tab.location.assign(url);
+    else window.open(url, "_blank", "noopener");
+    record(r, "whatsapp", message);
   }
 
   return (
@@ -187,7 +219,7 @@ export default function RemindersPage() {
                 lang={lang}
                 busy={busy === r.key || busy === "all"}
                 onSms={() => sendOne(r)}
-                onWhatsapp={() => whatsapp(r)}
+                onWhatsapp={() => void whatsapp(r)}
               />
             ))}
           </ul>
