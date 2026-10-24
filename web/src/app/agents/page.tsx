@@ -92,6 +92,16 @@ export default async function AgentsPage() {
             ))}
           </ul>
         )}
+
+        <div className="mt-12 flex flex-col items-start justify-between gap-4 rounded-2xl border border-line bg-surface p-6 sm:flex-row sm:items-center">
+          <div>
+            <p className="font-display text-xl text-heading">Are you an insurance agent?</p>
+            <p className="mt-1 text-sm text-mute">Get customers from this page, reminders that collect M-Pesa, and your own reviewed profile.</p>
+          </div>
+          <Link href="/agents/join" className="shrink-0 rounded-xl bg-forest px-4 py-2.5 text-sm font-semibold text-gold">
+            Apply to join
+          </Link>
+        </div>
       </main>
     </div>
   );

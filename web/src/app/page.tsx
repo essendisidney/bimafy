@@ -102,6 +102,12 @@ export default function Home() {
                 >
                   Try the agent desk — no sign-up
                 </EnterAs>
+                <Link
+                  href="/agents/join"
+                  className="mt-3 ml-0 inline-flex rounded-full border border-gold/60 px-5 py-3 text-sm font-semibold text-gold transition hover:bg-gold/10 sm:ml-3"
+                >
+                  Apply to become an agent
+                </Link>
               </div>
               <ul className="space-y-3">
                 {AGENT_REASONS.map(([title, body]) => (
@@ -166,7 +172,7 @@ export default function Home() {
             <Link href="/agents" className="hover:text-ink">Find an agent</Link>
             <Link href="/my" className="hover:text-ink">My cover</Link>
             <a href="#how" className="hover:text-ink">How it works</a>
-            <a href="#agents" className="hover:text-ink">For agents</a>
+            <Link href="/agents/join" className="hover:text-ink">Become an agent</Link>
             <Link href="/login" className="hover:text-ink">Sign in</Link>
           </div>
         </div>
