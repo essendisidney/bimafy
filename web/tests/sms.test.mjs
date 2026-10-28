@@ -1,31 +1,59 @@
 import assert from "node:assert/strict";
-import { execFileSync } from "node:child_process";
-import { createDecipheriv } from "node:crypto";
+import { createServer } from "node:http";
 import { test } from "node:test";
-import { kenyanMobile, taifaBody, taifaEncrypt } from "../src/lib/sms.ts";
+import { kenyanMobile, sendSms, TAIFA_SMS_URL, taifaBody, taifaRejection } from "../src/lib/sms.ts";
 
-const IV = Buffer.from("w4^dgd$%^62:)dgs");
-const keyBytes = (k) => { const b = Buffer.alloc(16); Buffer.from(k).copy(b, 0, 0, 16); return b; };
-
-test("Taifa payload matches OpenSSL AES-128-CBC (what PHP openssl_encrypt uses)", () => {
-  for (const key of ["short", "exactly16bytes!!", "a-much-longer-api-key-than-sixteen"]) {
-    const plain = JSON.stringify({ message: "Habari Amina, malipo yako ni KES 6,000.", recepients: "254712345678" });
-    const ours = taifaEncrypt(plain, key);
-    const ref = execFileSync("openssl", ["enc", "-aes-128-cbc", "-K", keyBytes(key).toString("hex"), "-iv", IV.toString("hex")], {
-      input: plain,
-    }).toString("hex");
-    assert.equal(ours, ref, `key ${key}`);
-  }
+test("Taifa uses the v2 endpoint and a plain JSON body", () => {
+  assert.equal(TAIFA_SMS_URL, "https://api.taifamobile.co.ke/v2/sms/sendsms");
+  assert.deepEqual(taifaBody("254712345678", "Hi Brian", "SIDNET"), {
+    mobile: "254712345678",
+    sender_name: "SIDNET",
+    message: "Hi Brian",
+    response_type: "json",
+  });
 });
 
-test("Taifa body decrypts back to the message and recipient", () => {
-  const body = taifaBody("254712345678", "Hi Brian", "test-key-123", "BIMAFY");
-  assert.equal(body.key, "test-key-123");
-  assert.equal(body.service_name, "BIMAFY");
-  const d = createDecipheriv("aes-128-cbc", keyBytes("test-key-123"), IV);
-  const plain = Buffer.concat([d.update(Buffer.from(body.message, "hex")), d.final()]).toString();
-  assert.deepEqual(JSON.parse(plain), { message: "Hi Brian", recepients: "254712345678" });
-  assert.equal(taifaBody("254712345678", "x", "k").service_name, null);
+test("Taifa status 1000 is success, anything else is a rejection", () => {
+  assert.equal(taifaRejection('[{"status_code":"1000","status_desc":"Success","message_id":1}]'), null);
+  assert.equal(taifaRejection('{"status_code":1000,"status_desc":"Success"}'), null);
+  assert.equal(taifaRejection('[{"status_code":"1004","status_desc":"Low credits"}]'), "Taifa 1004: Low credits");
+  assert.equal(taifaRejection("<html>404</html>"), "Bad response from Taifa: <html>404</html>");
+});
+
+test("sendSms posts to Taifa with the h_api_key header", async () => {
+  let seen;
+  const server = createServer((req, res) => {
+    let raw = "";
+    req.on("data", (c) => (raw += c));
+    req.on("end", () => {
+      seen = { method: req.method, key: req.headers["h_api_key"], type: req.headers["content-type"], body: JSON.parse(raw) };
+      res.setHeader("Content-Type", "application/json");
+      res.end(JSON.stringify(seen.body.mobile === "254700000000"
+        ? [{ status_code: "1003", status_desc: "Invalid mobile" }]
+        : [{ status_code: "1000", status_desc: "Success", message_id: 42, credit_balance: "6.33" }]));
+    });
+  });
+  await new Promise((r) => server.listen(0, "127.0.0.1", r));
+  const env = { ...process.env };
+  process.env.TAIFA_MOBILE_URL = `http://127.0.0.1:${server.address().port}/`;
+  process.env.TAIFA_API_KEY = ' "your-taifa-api-key" ';
+  delete process.env.TAIFA_MOBILE_SERVICE_NAME;
+  delete process.env.TAIFA_SENDER_ID;
+  try {
+    const r = await sendSms("0712 345 678", "Habari");
+    assert.equal(r.provider, "taifa");
+    assert.equal(r.messageId, "42");
+    assert.deepEqual(seen, {
+      method: "POST",
+      key: "your-taifa-api-key",
+      type: "application/json",
+      body: { mobile: "254712345678", sender_name: "SIDNET", message: "Habari", response_type: "json" },
+    });
+    await assert.rejects(sendSms("0700000000", "x"), /Taifa 1003: Invalid mobile/);
+  } finally {
+    process.env = env;
+    server.close();
+  }
 });
 
 test("only Kenyan mobiles are accepted", () => {
