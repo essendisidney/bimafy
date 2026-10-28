@@ -78,7 +78,7 @@ export function goLiveChecklist(s: ServerFacts, d: DbFacts | null): Check[] {
           title: "SMS",
           state: "todo",
           detail: "No SMS provider is set, so reminders, sign-in codes and claim updates are only simulated.",
-          fix: [`${VERCEL_ENV}, add TAIFA_MOBILE_API_KEY (your key from the Taifa Mobile dashboard), mark it Sensitive, then redeploy.`],
+          fix: [`${VERCEL_ENV}, add TAIFA_API_KEY (your key from the Taifa Mobile dashboard), mark it Sensitive, then redeploy.`],
         },
   );
 

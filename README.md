@@ -35,7 +35,7 @@ This repo ships a working **Next.js console** (`web/`), a **Postgres/Supabase sc
     `insert into private.app_secrets (name, sha256) values ('mpesa_callback', encode(extensions.digest('<secret>', 'sha256'), 'hex')) on conflict (name) do update set sha256 = excluded.sha256;`
 - **Reminders & instalments:** `/app/reminders` lists who to message each day — renewals at 30, 7 and
   1 days before expiry (and a win-back 3 days after), and "lipa pole pole" instalments 3 days before,
-  on the day, 3 and 10 days late. SMS goes through Taifa Mobile (`TAIFA_MOBILE_API_KEY`) or Africa's
+  on the day, 3 and 10 days late. SMS goes through Taifa Mobile (`TAIFA_API_KEY`, `TAIFA_SENDER_ID`) or Africa's
   Talking (`AFRICASTALKING_*`), signed-in staff only; without keys it runs in test mode. Plans live in
   `policies.risk_payload.instalmentPlan`. Every send is recorded in `reminder_log` so nobody texts the
   same client twice. A Vercel Cron (`/api/reminders/run`, 08:00 Nairobi) sends the day's reminders

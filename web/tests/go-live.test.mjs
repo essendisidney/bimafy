@@ -17,7 +17,7 @@ test("today's live setup: the right things are flagged with the right fixes", ()
   const c = byId(goLiveChecklist(server(), db()));
   assert.equal(c.database.state, "done");
   assert.equal(c.sms.state, "todo");
-  assert.match(c.sms.fix[0], /TAIFA_MOBILE_API_KEY/);
+  assert.match(c.sms.fix[0], /TAIFA_API_KEY/);
   assert.equal(c.server_secret.state, "todo");
   assert.match(c.server_secret.fix.join(" "), /CRON_SECRET/);
   assert.equal(c.auto_reminders.state, "warn"); // can't be switched on before SMS + secret

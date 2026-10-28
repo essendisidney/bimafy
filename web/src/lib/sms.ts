@@ -1,8 +1,7 @@
-import { createCipheriv } from "node:crypto";
 import { msisdn } from "./engines/agency.ts";
 
 /**
- * Outbound SMS. Taifa Mobile is used when TAIFA_MOBILE_API_KEY is set,
+ * Outbound SMS. Taifa Mobile is used when TAIFA_API_KEY is set,
  * otherwise Africa's Talking (AFRICASTALKING_USERNAME / _API_KEY). With
  * neither, sends are simulated so demos and previews still work end to end.
  */
@@ -12,7 +11,7 @@ export const MAX_SMS_CHARS = 459; // three SMS parts
 export type SmsProvider = "taifa" | "africastalking";
 
 export function smsProvider(): SmsProvider | null {
-  if (process.env.TAIFA_MOBILE_API_KEY) return "taifa";
+  if (taifaApiKey()) return "taifa";
   if (process.env.AFRICASTALKING_USERNAME && process.env.AFRICASTALKING_API_KEY) return "africastalking";
   return null;
 }
@@ -51,52 +50,67 @@ export async function sendSms(phone: string, message: string): Promise<SmsResult
 
 // ------------------------------------------------------------------ Taifa Mobile
 
-const TAIFA_URL = "https://sms.taifamobile.co.ke/clientapi/sms/";
-/** Fixed IV from Taifa Mobile's client library (github.com/taifaMobile/sms). */
-const TAIFA_IV = Buffer.from("w4^dgd$%^62:)dgs", "utf8");
+export const TAIFA_SMS_URL = "https://api.taifamobile.co.ke/v2/sms/sendsms";
 
-const TAIFA_STATUS: Record<string, string> = {
-  "00": "Success",
-  "01": "Failed",
-  "97": "Not enough SMS credit on the Taifa Mobile account",
-  "98": "Taifa Mobile service not found — check TAIFA_MOBILE_SERVICE_NAME",
-  "99": "Taifa Mobile rejected the request (missing details)",
-};
-
-/**
- * Taifa Mobile expects the JSON payload AES-128-CBC encrypted with the API key
- * and hex-encoded — the same as PHP's openssl_encrypt, which zero-pads (or
- * truncates) the key to 16 bytes.
- */
-export function taifaEncrypt(plaintext: string, apiKey: string) {
-  const key = Buffer.alloc(16);
-  Buffer.from(apiKey, "utf8").copy(key, 0, 0, 16);
-  const cipher = createCipheriv("aes-128-cbc", key, TAIFA_IV);
-  return Buffer.concat([cipher.update(plaintext, "utf8"), cipher.final()]).toString("hex");
+/** Env value with surrounding whitespace and quotes removed. */
+function envValue(name: string) {
+  return (process.env[name] ?? "").trim().replace(/^["']|["']$/g, "").trim();
 }
 
-/** The request body Taifa Mobile's /clientapi/sms/ endpoint takes. */
-export function taifaBody(to: string, message: string, apiKey: string, serviceName?: string | null) {
-  const encrypted = taifaEncrypt(JSON.stringify({ message, recepients: to }), apiKey);
-  return { message: encrypted, key: apiKey, service_name: serviceName || null };
+/** TAIFA_API_KEY, falling back to the older TAIFA_MOBILE_API_KEY name. */
+export function taifaApiKey() {
+  return envValue("TAIFA_API_KEY") || envValue("TAIFA_MOBILE_API_KEY");
+}
+
+/** Approved sender name; SIDNET is the only one on the account. */
+export function taifaSender() {
+  return envValue("TAIFA_MOBILE_SERVICE_NAME") || envValue("TAIFA_SENDER_ID") || "SIDNET";
+}
+
+/** The JSON body Taifa Mobile's v2 /sms/sendsms endpoint takes. */
+export function taifaBody(to: string, message: string, senderName: string) {
+  return { mobile: to, sender_name: senderName, message, response_type: "json" };
+}
+
+/** null when Taifa accepted the message (status 1000), otherwise why it didn't. */
+export function taifaRejection(text: string): string | null {
+  let row: { status_code?: string | number; status_desc?: string } | undefined;
+  try {
+    const parsed = JSON.parse(text) as unknown;
+    row = (Array.isArray(parsed) ? parsed[0] : parsed) as typeof row;
+  } catch {
+    return `Bad response from Taifa: ${text.slice(0, 120)}`;
+  }
+  const code = String(row?.status_code ?? "");
+  if (code === "1000") return null;
+  return `Taifa ${code || "?"}: ${row?.status_desc ?? text.slice(0, 120)}`;
 }
 
 async function sendTaifa(to: string, text: string): Promise<SmsResult> {
-  const apiKey = process.env.TAIFA_MOBILE_API_KEY!;
-  // TAIFA_MOBILE_URL only exists to point tests at a stand-in server.
-  const res = await fetch(process.env.TAIFA_MOBILE_URL || TAIFA_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Accept: "application/json" },
-    body: JSON.stringify(taifaBody(to, text, apiKey, process.env.TAIFA_MOBILE_SERVICE_NAME)),
-    signal: AbortSignal.timeout(15_000),
-  });
-  if (!res.ok) throw new Error(`Taifa Mobile error (${res.status})`);
-  const raw = await res.json().catch(() => null);
-  const r = (Array.isArray(raw) ? raw[0] : raw) as { messageId?: string; status?: string | number; statusDescription?: string } | null;
-  if (!r) throw new Error("Taifa Mobile did not accept the message");
-  const code = String(r.status ?? "").padStart(2, "0");
-  if (code !== "00") throw new Error(`SMS not sent: ${TAIFA_STATUS[code] ?? r.statusDescription ?? `status ${code}`}`);
-  return { mode: "live", provider: "taifa", to, status: r.statusDescription ?? "Success", messageId: r.messageId };
+  let body: string;
+  try {
+    // TAIFA_MOBILE_URL only exists to point tests at a stand-in server.
+    const res = await fetch(process.env.TAIFA_MOBILE_URL || TAIFA_SMS_URL, {
+      method: "POST",
+      headers: { h_api_key: taifaApiKey(), "Content-Type": "application/json" },
+      body: JSON.stringify(taifaBody(to, text, taifaSender())),
+      signal: AbortSignal.timeout(20_000),
+    });
+    body = await res.text();
+  } catch (e) {
+    throw new Error(`Taifa unreachable: ${e instanceof Error ? e.message : String(e)}`);
+  }
+  const err = taifaRejection(body);
+  if (err) throw new Error(err);
+  const raw = JSON.parse(body) as unknown;
+  const r = (Array.isArray(raw) ? raw[0] : raw) as { message_id?: string | number; status_desc?: string };
+  return {
+    mode: "live",
+    provider: "taifa",
+    to,
+    status: r.status_desc ?? "Success",
+    messageId: r.message_id == null ? undefined : String(r.message_id),
+  };
 }
 
 // ------------------------------------------------------------------ Africa's Talking
